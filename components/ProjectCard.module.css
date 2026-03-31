@@ -54,7 +54,7 @@
 }
 
 .tagline {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-md);
   color: var(--muted);
   line-height: 1.6;
 }
@@ -84,7 +84,7 @@
 
 .tag {
   font-family: var(--font-mono), monospace;
-  font-size: var(--font-size-2xs);
+  font-size: var(--font-size-xs);
   color: var(--muted);
   letter-spacing: 0.1em;
   text-transform: uppercase;

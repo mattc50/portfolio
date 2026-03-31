@@ -16,7 +16,7 @@
 
 .eyebrow {
   font-family: var(--font-mono), monospace;
-  font-size: var(--font-size-2xs);
+  font-size: var(--font-size-xs);
   color: var(--muted);
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -27,11 +27,7 @@
 .heading {
   font-size: var(--font-size-4xl);
   max-width: var(--max-prose);
-  line-height: 1.1;
-}
-
-@media (min-width: 768px) {
-  .heading { font-size: var(--font-size-6xl); }
+  line-height: 1.2;
 }
 
 /* Two-column layout */

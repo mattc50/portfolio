@@ -1,0 +1,23 @@
+.footer {
+  padding: var(--space-10);
+  margin: 0 auto;
+  max-width: var(--max-content);
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  justify-content: space-between;
+
+  & a {
+    transition: opacity var(--transition);
+    opacity: 0.4;
+  }
+
+  & a:hover {
+    opacity: 1;
+  }
+}
+
+.footer-links {
+  display: flex;
+  gap: 16px;
+}

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { getPublishedProjects } from "@/lib/projects";
 import styles from "./home.module.css";
 import { ProjectCard } from "@/components/ProjectCard";
+import { Footer } from "@/components/Footer";
 
 export default function Home() {
   const projects = getPublishedProjects();
@@ -30,6 +31,7 @@ export default function Home() {
           </div>
         </div>
       </section>
+      <Footer />
     </>
   );
 }

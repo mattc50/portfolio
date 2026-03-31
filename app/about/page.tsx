@@ -33,23 +33,6 @@ export default function AboutPage() {
               ))}
             </ul>
           </div>
-
-          <div className={styles.sidebarSection}>
-            <h2>Links</h2>
-            <ul>
-              {about.links.map(({ label, href }) => (
-                <li key={label}>
-                  <a
-                    href={href}
-                    target={href.startsWith("mailto") ? undefined : "_blank"}
-                    rel="noopener noreferrer"
-                  >
-                    {label} →
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
         </aside>
       </div>
     </section>
