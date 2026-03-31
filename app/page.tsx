@@ -2,8 +2,8 @@ import { getPublishedProjects } from "@/lib/projects";
 import styles from "./home.module.css";
 import { ProjectCard } from "@/components/ProjectCard";
 import { Footer } from "@/components/Footer";
-import { Lct } from "@/components/icons/lct";
-import { Esb } from "@/components/icons/esb";
+import { Lct } from "@/components/icons/Lct";
+import { Esb } from "@/components/icons/Esb";
 
 export default function Home() {
   const projects = getPublishedProjects();
