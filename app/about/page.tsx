@@ -7,6 +7,20 @@ export const metadata: Metadata = {
   description: about.intro,
 };
 
+function EmailIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <path
+        d="M2.5 4L7 7.5L11.5 4M3 10.5H11C11.2761 10.5 11.5 10.2761 11.5 10V4C11.5 3.72386 11.2761 3.5 11 3.5H3C2.72386 3.5 2.5 3.72386 2.5 4V10C2.5 10.2761 2.72386 10.5 3 10.5Z"
+        stroke="currentColor"
+        strokeWidth="1"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  )
+};
+
 export default function AboutPage() {
   return (
     <section className={styles.section}>
@@ -28,9 +42,19 @@ export default function AboutPage() {
           <div className={styles.sidebarSection}>
             <h2>Currently</h2>
             <ul>
-              {about.currently.map((item) => (
-                <li key={item}>{item}</li>
-              ))}
+              {about.currently.map((item, index) => {
+                return (
+                  index < about.currently.length - 1
+                    ? <li key={item}>{item}</li>
+                    : (
+                      <li>
+                        <a href="mailto:mattcanabarro50@gmail.com?subject=Hello%20from%20Your%20Portfolio!">
+                          <EmailIcon />{item}
+                        </a>
+                      </li>
+                    )
+                )
+              })}
             </ul>
           </div>
         </aside>
