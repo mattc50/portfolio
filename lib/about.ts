@@ -12,16 +12,17 @@ to close the gap between design intent and shipped reality.`,
 
   // Body copy — each string renders as a paragraph
   bio: [
-    `Currently at iSonic.ai, where I own end-to-end product design and contribute to frontend implementation across consumer, creator, and admin surfaces. Previously Head of Design at d1g1t, a wealth management platform where I led design across billing, KYC, and goals-based planning.`,
-    `My background spans product design, design engineering, and AI product work. I'm most comfortable at the intersection of systems thinking and interaction craft — building design systems that scale and shipping interfaces that feel considered at every detail.`,
-    `I work primarily in Figma, React, and TypeScript. I care deeply about the moments between states: loading, empty, error, transition.`,
+    `Passionate about understanding people and interested in studying psychology, I didn't realize how this could synergize with artistic creativity until I encountered Product Design in university. I loved talking to people to learn about them, and creating tangible and emotional experiences that stemmed from the findings of those discussions.`,
+    `After graduating from university, I worked as a User Experience Designer for a fintech startup, and learned through collaboration with financial engineers, software engineers, product managers, and senior leadership about how the different sectors of a software company come together to deliver successful product launches and experiences. Also recognizing how tied together a software's services (backend) and user interface (frontend) are, I started to learn full-stack programming on the side, and quickly became a point of contact not only for designing the product experience, but also how to implement it with precision in code.`,
+    `Currently, I work as a freelance Product Design consultant and founding Product Designer across different early-stage software ventures, and I look to continuously utilize and grow my understanding of UX design, full-stack development, and project management to deliver products that elicit delight while truly addressing peoples' needs.`,
+    `I am a tinkerer at heart, and find the acquisition of growth of new skills extremely fulfilling. In my free time, you can find me toying with web/mobile development, watching/playing soccer, or attempting to make latte art!`,
   ],
 
   // Currently section — shown as a simple list
   currently: [
-    "Product Design @ iSonic.ai",
-    "Open to senior IC and lead roles",
-    "Based in Jersey City, NJ",
+    "Product Designer & Engineer @ iSonic.ai",
+    // "Open to senior IC and lead roles",
+    "Based in Hoboken, NJ",
   ],
 
   // Links shown in the sidebar / contact area

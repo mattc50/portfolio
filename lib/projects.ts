@@ -42,10 +42,8 @@ export const projects: Project[] = [
   {
     slug: "unified-inbox",
     title: "Unified Inbox",
-    tagline: "Centralizing creator-fan engagement across platforms into a single, intelligent inbox.",
-    description: `The iSonic creator platform had engagement happening across DMs, comments, and fan messages from multiple sources — with no unified surface to manage it. Creators were context-switching constantly and missing high-value interactions.
-
-I led end-to-end design of the Unified Inbox: from initial concept and information architecture through component design, interaction patterns, and handoff. The inbox aggregates messages across channels, surfaces AI-prioritized conversations, and gives creators and their teams the tooling to respond at scale.`,
+    tagline: "Turning fragmented creator conversations into a unified, content-aware response system.",
+    description: `I led end-to-end design of the Unified Inbox: from product definition and interaction architecture through high-fidelity interface design and system-level component work. The experience consolidates messages across social platforms, connects each conversation to a creator's content library, and enables AI-assisted replies that remain grounded in existing content and customizable brand voice.`,
     company: "iSonic.ai",
     year: "2024",
     roles: ["Product Design", "Design Systems", "Frontend Engineering"],
@@ -56,10 +54,8 @@ I led end-to-end design of the Unified Inbox: from initial concept and informati
   {
     slug: "lenz",
     title: "Lenz",
-    tagline: "A mobile-first tool for photographers to manage shoots, edits, and client delivery.",
-    description: `Lenz started as a freelance engagement to redesign a photography workflow app that had grown unwieldy. The core problem: photographers needed a single place to manage shoot logistics, selects, and final delivery — without it feeling like project management software.
-
-I redesigned the core flows from the ground up, with a strong focus on the gallery and delivery experience. The result was a significantly simplified IA and a mobile-first interface that matched how photographers actually work on set.`,
+    tagline: "Transforming property inspections into a self-serve, evidence-driven experience for tenants.",
+    description: `I led end-to-end product design for Lenz, a tenancy inspection platform built to help renters independently document property condition across check-in, mid-term, and check-out stages. I translated inspection requirements into a progressive mobile workflow, designed reporting and comparison systems that make evidence easy to capture and review, and implemented advanced React Native interactions—including animated components and a dynamic tenancy timeline—to preserve a rich, trustworthy user experience in production.`,
     company: "Lenz",
     year: "2023",
     roles: ["Product Design", "UX Design", "Frontend Engineering"],
@@ -70,10 +66,8 @@ I redesigned the core flows from the ground up, with a strong focus on the galle
   {
     slug: "venmo-split",
     title: "Venmo Split",
-    tagline: "Reimagining group expense splitting as a native, frictionless Venmo experience.",
-    description: `A speculative redesign exploring how Venmo could better support the group splitting use case that already drives much of its organic usage. The existing flow required too many steps and lacked clarity around who owed what.
-
-I designed an end-to-end splitting experience — from initiating a split to settling up — with an emphasis on reducing cognitive load and making the social context of splitting feel natural rather than transactional.`,
+    tagline: "Reframing peer-to-peer payments around the social moments they support.",
+    description: `I designed Venmo Split as a research-led enhancement to Venmo's core payment flow, identifying how users manage shared expenses and translating those behaviors into a multi-person bill-splitting experience. From interviews and affinity mapping through IA redesign, interaction design, and high-fidelity prototyping, I created a receipt-based request flow that simplifies item assignment, tax and tip distribution, and reimbursement visibility while staying consistent with Venmo's existing design language.`,
     company: "Case Study",
     year: "2023",
     roles: ["Product Design", "UX Design"],
