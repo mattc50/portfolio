@@ -23,6 +23,7 @@ to close the gap between design intent and shipped reality.`,
     "Product Designer & Engineer @ iSonic.ai",
     // "Open to senior IC and lead roles",
     "Based in Hoboken, NJ",
+    "Send me an email!"
   ],
 
   // Links shown in the sidebar / contact area

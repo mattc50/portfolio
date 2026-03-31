@@ -42,6 +42,16 @@
   line-height: 1.6;
   margin-bottom: var(--space-12);
   max-width: var(--max-prose);
+
+  & svg {
+    margin-bottom: -1px;
+    margin-left: 6px;
+    margin-right: 6px;
+  }
+
+  & span {
+    white-space: nowrap;
+  }
 }
 
 .home_actions__r95_w {
