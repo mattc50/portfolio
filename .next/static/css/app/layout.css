@@ -277,6 +277,19 @@ body {
   line-height: 1.6;
   background-color: var(--canvas);
   min-height: 100vh;
+  position: relative;
+
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    opacity: 1;
+    mix-blend-mode: overlay;
+    background-image: url(/_next/static/media/noise.53102891.svg);
+    background-repeat: repeat;
+    pointer-events: none;
+  }
 }
 
 img {

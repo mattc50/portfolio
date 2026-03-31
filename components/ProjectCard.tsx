@@ -36,10 +36,10 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
           <h2 className={styles.title}>{project.title}</h2>
           <p className={styles.tagline}>{project.tagline}</p>
         </div>
-        <div className={styles.metaRight}>
+        {/* <div className={styles.metaRight}>
           <span className={styles.label}>{project.company}</span>
           <span className={styles.label}>{project.year}</span>
-        </div>
+        </div> */}
       </div>
 
       {/* Role tags */}

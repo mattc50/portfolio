@@ -19,7 +19,7 @@
   align-items: center;
   gap: var(--space-2);
   font-family: var(--font-mono), monospace;
-  font-size: var(--font-size-2xs);
+  font-size: var(--font-size-xs);
   color: var(--muted);
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -43,7 +43,7 @@
 
 .slug_tag__l33H7 {
   font-family: var(--font-mono), monospace;
-  font-size: var(--font-size-2xs);
+  font-size: var(--font-size-xs);
   color: var(--muted);
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -191,3 +191,29 @@
   background-color: var(--accent-hover);
 }
 
+/*!************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[7].use[3]!./components/footer.module.css ***!
+  \************************************************************************************************************************************************************************************************************************************************************************/
+.footer_footer__mqdak {
+  padding: var(--space-10);
+  margin: 0 auto;
+  max-width: var(--max-content);
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  justify-content: space-between;
+
+  & a {
+    transition: opacity 0.2s ease;
+    opacity: 0.4;
+  }
+
+  & a:hover {
+    opacity: 1;
+  }
+}
+
+.footer_footer-links__COAtX {
+  display: flex;
+  gap: 16px;
+}

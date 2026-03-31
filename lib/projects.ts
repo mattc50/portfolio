@@ -48,9 +48,9 @@ export const projects: Project[] = [
 I led end-to-end design of the Unified Inbox: from initial concept and information architecture through component design, interaction patterns, and handoff. The inbox aggregates messages across channels, surfaces AI-prioritized conversations, and gives creators and their teams the tooling to respond at scale.`,
     company: "iSonic.ai",
     year: "2024",
-    roles: ["Product Design", "Design Systems"],
-    figmaUrl: "https://figma.com/your-link-here", // ← replace with real share URL
-    coverImage: undefined,
+    roles: ["Product Design", "Design Systems", "Frontend Engineering"],
+    figmaUrl: "https://www.figma.com/deck/pjQmKuFEGApisZcb6ifY6s", // ← replace with real share URL
+    coverImage: "/projects/unified-inbox.png",
     published: true,
   },
   {
@@ -62,9 +62,9 @@ I led end-to-end design of the Unified Inbox: from initial concept and informati
 I redesigned the core flows from the ground up, with a strong focus on the gallery and delivery experience. The result was a significantly simplified IA and a mobile-first interface that matched how photographers actually work on set.`,
     company: "Lenz",
     year: "2023",
-    roles: ["Product Design", "UX Design"],
-    figmaUrl: "https://figma.com/your-link-here", // ← replace with real share URL
-    coverImage: undefined,
+    roles: ["Product Design", "UX Design", "Frontend Engineering"],
+    figmaUrl: "https://www.figma.com/deck/8DOz3LMYE6CI7Rhh4wpSzm", // ← replace with real share URL
+    coverImage: "/projects/lenz.png",
     published: true,
   },
   {
@@ -77,8 +77,8 @@ I designed an end-to-end splitting experience — from initiating a split to set
     company: "Case Study",
     year: "2023",
     roles: ["Product Design", "UX Design"],
-    figmaUrl: "https://figma.com/your-link-here", // ← replace with real share URL
-    coverImage: undefined,
+    figmaUrl: "https://www.figma.com/deck/QUiqv1VXvKBCQmyWdqrwjB", // ← replace with real share URL
+    coverImage: "/projects/venmo-split.png",
     published: true,
   },
 ];

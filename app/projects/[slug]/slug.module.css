@@ -16,7 +16,7 @@
   align-items: center;
   gap: var(--space-2);
   font-family: var(--font-mono), monospace;
-  font-size: var(--font-size-2xs);
+  font-size: var(--font-size-xs);
   color: var(--muted);
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -40,7 +40,7 @@
 
 .tag {
   font-family: var(--font-mono), monospace;
-  font-size: var(--font-size-2xs);
+  font-size: var(--font-size-xs);
   color: var(--muted);
   letter-spacing: 0.1em;
   text-transform: uppercase;

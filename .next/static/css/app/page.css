@@ -1,39 +1,23 @@
 /*!***************************************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[7].use[3]!./app/home.module.css ***!
   \***************************************************************************************************************************************************************************************************************************************************************/
-.home_section__bCaaS {
-  position: relative;
-
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    opacity: 1;
-    mix-blend-mode: overlay;
-    background-image: url(/_next/static/media/noise.53102891.svg);
-    background-repeat: repeat;
-    pointer-events: none;
-  }
-}
-
 .home_section-content___Tjsa {
     max-width: var(--max-content);
     margin: 0 auto;
-    padding: var(--space-24) var(--space-6);
+    padding: var(--space-12) var(--space-6);
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     position: relative;
 }
 
 @media (min-width: 768px) {
   .home_section-content___Tjsa {
-    padding: 9rem var(--space-10);
+    padding: var(--space-20) var(--space-10);
   }
 }
 
 .home_hero__o4ZPq {
-  text-align: center;
   max-width: var(--max-prose);
 }
 
@@ -124,6 +108,14 @@
 }
 
 @media (min-width: 768px) {
+  .home_hero__o4ZPq {
+      text-align: center;
+  }
+
+  .home_section-content___Tjsa {
+    align-items: center;
+  }
+
   .home_heading1__n28v5 {
     font-size: var(--font-size-6xl);
   }
@@ -137,6 +129,32 @@
   }
 }
 
+/*!************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[7].use[3]!./components/footer.module.css ***!
+  \************************************************************************************************************************************************************************************************************************************************************************/
+.footer_footer__mqdak {
+  padding: var(--space-10);
+  margin: 0 auto;
+  max-width: var(--max-content);
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  justify-content: space-between;
+
+  & a {
+    transition: opacity 0.2s ease;
+    opacity: 0.4;
+  }
+
+  & a:hover {
+    opacity: 1;
+  }
+}
+
+.footer_footer-links__COAtX {
+  display: flex;
+  gap: 16px;
+}
 /*!*****************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[7].use[3]!./components/ProjectCard.module.css ***!
   \*****************************************************************************************************************************************************************************************************************************************************************************/
@@ -196,7 +214,7 @@
 }
 
 .ProjectCard_tagline__WfYb_ {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-md);
   color: var(--muted);
   line-height: 1.6;
 }
@@ -226,7 +244,7 @@
 
 .ProjectCard_tag__5dAJt {
   font-family: var(--font-mono), monospace;
-  font-size: var(--font-size-2xs);
+  font-size: var(--font-size-xs);
   color: var(--muted);
   letter-spacing: 0.1em;
   text-transform: uppercase;

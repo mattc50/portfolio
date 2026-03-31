@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import styles from "./Nav.module.css";
 
 const links = [
-  { href: "/projects", label: "Projects" },
-  { href: "/about",    label: "About" },
+  { href: "/", label: "Projects" },
+  { href: "/about", label: "About" },
 ];
 
 export function Nav() {
@@ -16,12 +16,12 @@ export function Nav() {
     <header className={styles.header}>
       <nav className={styles.nav}>
         <Link href="/" className={styles.wordmark}>
-          MC
+          <img src="/mc-logo.svg" />
         </Link>
 
         <ul className={styles.links}>
           {links.map(({ href, label }) => {
-            const active = pathname.startsWith(href);
+            const active = pathname === href;
             return (
               <li key={href}>
                 <Link
