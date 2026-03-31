@@ -1,0 +1,99 @@
+.section {
+  max-width: var(--max-content);
+  margin: 0 auto;
+  padding: var(--space-16) var(--space-6);
+}
+
+@media (min-width: 768px) {
+  .section {
+    padding: var(--space-24) var(--space-10);
+  }
+}
+
+.header {
+  margin-bottom: var(--space-16);
+}
+
+.eyebrow {
+  font-family: var(--font-mono), monospace;
+  font-size: var(--font-size-2xs);
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: var(--space-4);
+}
+
+.heading {
+  font-size: var(--font-size-4xl);
+  max-width: var(--max-prose);
+  line-height: 1.1;
+}
+
+@media (min-width: 768px) {
+  .heading { font-size: var(--font-size-6xl); }
+}
+
+/* Two-column layout */
+.body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-12);
+}
+
+@media (min-width: 768px) {
+  .body {
+    grid-template-columns: 1fr 240px;
+    gap: var(--space-20);
+  }
+}
+
+/* Bio */
+.bio {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.bio p {
+  font-size: var(--font-size-base);
+  line-height: 1.7;
+}
+
+/* Sidebar */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+
+.sidebarSection h2 {
+  font-family: var(--font-mono), monospace;
+  font-size: var(--font-size-2xs);
+  font-weight: 400;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: var(--space-4);
+}
+
+.sidebarSection ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.sidebarSection li {
+  font-size: var(--font-size-sm);
+  color: var(--ink);
+}
+
+.sidebarSection a {
+  font-size: var(--font-size-sm);
+  color: var(--muted);
+  transition: color var(--transition);
+}
+
+.sidebarSection a:hover {
+  color: var(--ink);
+}

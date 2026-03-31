@@ -1,0 +1,36 @@
+/*!********************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[7].use[2]!./node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[7].use[3]!./app/not-found.module.css ***!
+  \********************************************************************************************************************************************************************************************************************************************************************/
+.not-found_section__L6nGj {
+  max-width: var(--max-content);
+  margin: 0 auto;
+  padding: var(--space-24) var(--space-6);
+}
+
+.not-found_eyebrow___b_ZB {
+  font-family: var(--font-mono), monospace;
+  font-size: var(--font-size-2xs);
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: var(--space-4);
+}
+
+.not-found_heading__cU7M4 {
+  font-size: var(--font-size-4xl);
+  margin-bottom: var(--space-6);
+}
+
+@media (min-width: 768px) {
+  .not-found_heading__cU7M4 { font-size: var(--font-size-5xl); }
+}
+
+.not-found_back__N9yjR {
+  font-size: var(--font-size-sm);
+  color: var(--muted);
+  transition: color var(--transition);
+}
+
+.not-found_back__N9yjR:hover { color: var(--ink); }
+

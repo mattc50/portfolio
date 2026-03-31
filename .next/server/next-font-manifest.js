@@ -1,0 +1,1 @@
+self.__NEXT_FONT_MANIFEST="{\"pages\":{},\"app\":{\"/Users/mattcanabarro/Downloads/portfolio/app/layout\":[\"static/media/0e96d314a90a6138-s.p.woff2\",\"static/media/b7ea2ab4a8ad1f81-s.p.woff2\",\"static/media/13971731025ec697-s.p.woff2\",\"static/media/cafe7ff58138fc50-s.p.woff2\"]},\"appUsingSizeAdjust\":true,\"pagesUsingSizeAdjust\":false}"

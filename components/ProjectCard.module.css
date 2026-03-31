@@ -1,0 +1,94 @@
+.card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Cover image area */
+.cover {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-5);
+  overflow: hidden;
+  background-color: var(--border);
+  transition: opacity var(--transition);
+}
+
+.card:hover .cover {
+  opacity: 0.88;
+}
+
+.coverImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.coverPlaceholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  padding: var(--space-5);
+}
+
+/* Meta row */
+.meta {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.title {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: var(--font-size-xl);
+  line-height: 1.25;
+  margin-bottom: var(--space-1);
+  transition: opacity var(--transition);
+}
+
+.card:hover .title {
+  opacity: 0.65;
+}
+
+.tagline {
+  font-size: var(--font-size-sm);
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.metaRight {
+  flex-shrink: 0;
+  text-align: right;
+}
+
+/* Role tags */
+.roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+/* Shared label style — mono caps */
+.label {
+  font-family: var(--font-mono), monospace;
+  font-size: var(--font-size-2xs);
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  display: block;
+}
+
+.tag {
+  font-family: var(--font-mono), monospace;
+  font-size: var(--font-size-2xs);
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  padding: 0.125rem var(--space-3);
+}
