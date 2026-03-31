@@ -1,0 +1,59 @@
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background-color: color-mix(in srgb, var(--canvas) 90%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav {
+  max-width: var(--max-content);
+  margin: 0 auto;
+  padding: 0 var(--space-6);
+  height: var(--nav-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@media (min-width: 768px) {
+  .nav {
+    padding: 0 var(--space-10);
+  }
+}
+
+.wordmark {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: var(--font-size-lg);
+  line-height: 1;
+  transition: opacity var(--transition);
+}
+
+.wordmark:hover {
+  opacity: 0.6;
+}
+
+.links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.link {
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: var(--font-size-sm);
+  letter-spacing: 0.025em;
+  color: var(--muted);
+  transition: color var(--transition);
+}
+
+.link:hover {
+  color: var(--ink);
+}
+
+.linkActive {
+  color: var(--ink);
+}
