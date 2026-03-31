@@ -280,16 +280,22 @@ body {
   position: relative;
 
 
-  /* &::before {
+  &::before {
     content: "";
     position: absolute;
+    /* z-index: -1; */
     inset: 0;
     opacity: 1;
     mix-blend-mode: overlay;
-    background-image: url("../public/noise.svg");
+    background-image: url(/_next/static/media/noise.53102891.svg);
     background-repeat: repeat;
     pointer-events: none;
-  } */
+  }
+
+  & > * {
+    position: relative;
+    z-index: 1;
+  }
 }
 
 img {

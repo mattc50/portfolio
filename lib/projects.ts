@@ -45,7 +45,7 @@ export const projects: Project[] = [
     tagline: "Turning fragmented creator conversations into a unified, content-aware response system.",
     description: `I led end-to-end design of the Unified Inbox: from product definition and interaction architecture through high-fidelity interface design and system-level component work. The experience consolidates messages across social platforms, connects each conversation to a creator's content library, and enables AI-assisted replies that remain grounded in existing content and customizable brand voice.`,
     company: "iSonic.ai",
-    year: "2024",
+    year: "2025",
     roles: ["Product Design", "Design Systems", "Frontend Engineering"],
     figmaUrl: "https://www.figma.com/deck/pjQmKuFEGApisZcb6ifY6s", // ← replace with real share URL
     coverImage: "/projects/unified-inbox.png",
@@ -57,7 +57,7 @@ export const projects: Project[] = [
     tagline: "Transforming property inspections into a self-serve, evidence-driven experience for tenants.",
     description: `I led end-to-end product design for Lenz, a tenancy inspection platform built to help renters independently document property condition across check-in, mid-term, and check-out stages. I translated inspection requirements into a progressive mobile workflow, designed reporting and comparison systems that make evidence easy to capture and review, and implemented advanced React Native interactions—including animated components and a dynamic tenancy timeline—to preserve a rich, trustworthy user experience in production.`,
     company: "Lenz",
-    year: "2023",
+    year: "2024",
     roles: ["Product Design", "UX Design", "Frontend Engineering"],
     figmaUrl: "https://www.figma.com/deck/8DOz3LMYE6CI7Rhh4wpSzm", // ← replace with real share URL
     coverImage: "/projects/lenz.png",
