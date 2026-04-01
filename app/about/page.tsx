@@ -47,7 +47,7 @@ export default function AboutPage() {
                   index < about.currently.length - 1
                     ? <li key={item}>{item}</li>
                     : (
-                      <li>
+                      <li key={item}>
                         <a href="mailto:mattcanabarro50@gmail.com?subject=Hello%20from%20Your%20Portfolio!">
                           <EmailIcon />{item}
                         </a>

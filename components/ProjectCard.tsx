@@ -12,7 +12,7 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
 
   return (
     <Link
-      href={`/projects/${project.slug}`}
+      href={`/${project.slug}`}
       className={`${styles.card} anim-fade-up ${delayClass}`}
     >
       {/* Cover */}
