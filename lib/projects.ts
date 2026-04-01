@@ -7,6 +7,7 @@ export type ProjectRole =
   | "Product Design"
   | "Design Engineering"
   | "UX Design"
+  | "Enterprise UX Design"
   | "Design Systems"
   | "Frontend Engineering";
 
@@ -25,8 +26,16 @@ export interface Project {
   year: string;
   /** Your roles on this project */
   roles: ProjectRole[];
-  /** Figma view-only share URL — shown as primary CTA on detail page */
-  figmaUrl: string;
+  /** Optional: Figma view-only share URL — shown as primary CTA on detail page */
+  figmaUrl?: string;
+  /** Optional: Article URL if the CTA should be an external webpage */
+  articleUrl?: string;
+  /** Optional: CTA accompanying article */
+  articleCta?: string;
+  /** Optional: Document URL if the CTA should be an external document */
+  docUrl?: string;
+  /** Optional: CTA accompanying document */
+  docCta?: string;
   /** Optional: cover image path under /public, e.g. "/projects/unified-inbox/cover.png" */
   coverImage?: string;
   /** Optional: accent color override for this project card (CSS color value) */
@@ -40,8 +49,8 @@ export interface Project {
 
 export const projects: Project[] = [
   {
-    slug: "unified-inbox",
-    title: "Unified Inbox",
+    slug: "isonic-unified-inbox",
+    title: "iSonic Unified Inbox",
     tagline: "Turning fragmented creator conversations into a unified, content-aware response system.",
     description: `I led end-to-end design of the Unified Inbox: from product definition and interaction architecture through high-fidelity interface design and system-level component work. The experience consolidates messages across social platforms, connects each conversation to a creator's content library, and enables AI-assisted replies that remain grounded in existing content and customizable brand voice.`,
     company: "iSonic.ai",
@@ -73,6 +82,21 @@ export const projects: Project[] = [
     roles: ["Product Design", "UX Design"],
     figmaUrl: "https://www.figma.com/deck/QUiqv1VXvKBCQmyWdqrwjB", // ← replace with real share URL
     coverImage: "/projects/venmo-split.png",
+    published: true,
+  },
+  {
+    slug: "d1g1t-billing-solution",
+    title: "d1g1t Billing Solution",
+    tagline: "Powering how advisory firms manage fees at scale.",
+    description: `I assisted in developing the user experience and interfaces for d1g1t's billing solution, providing wealth management firms with a streamlined workflow for generating, analyzing, reviewing, approving, and processing fees, as well as sending invoices — all within the d1g1t product ecosystem.`,
+    company: "d1g1t Inc.",
+    year: "2023",
+    roles: ["Product Design", "Enterprise UX Design"],
+    articleUrl: "https://www.d1g1t.com/billing/",
+    articleCta: "View Article",
+    docUrl: "https://www.d1g1t.com/wp-content/uploads/2024/12/d1g1t-Billing-Solution-Sheet.pdf",
+    docCta: "Read Solution Sheet",
+    coverImage: "/projects/d1g1t.png",
     published: true,
   },
 ];

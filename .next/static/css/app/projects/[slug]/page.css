@@ -170,7 +170,14 @@
   font-size: var(--font-size-sm);
   color: var(--muted);
   line-height: 1.6;
-  margin-bottom: var(--space-5);
+}
+
+.slug_sidebarBtns__ATY1V {
+  margin-top: var(--space-5);
+}
+
+.slug_sidebarBtns__ATY1V .slug_figmaBtn__kyewg:not(:last-child) {
+  margin-bottom: var(--space-3);
 }
 
 .slug_figmaBtn__kyewg {
