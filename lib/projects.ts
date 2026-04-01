@@ -12,7 +12,7 @@ export type ProjectRole =
   | "Frontend Engineering";
 
 export interface Project {
-  /** URL slug, e.g. "unified-inbox" → /projects/unified-inbox */
+  /** URL slug, e.g. "unified-inbox" → /unified-inbox */
   slug: string;
   /** Display title */
   title: string;
@@ -36,7 +36,7 @@ export interface Project {
   docUrl?: string;
   /** Optional: CTA accompanying document */
   docCta?: string;
-  /** Optional: cover image path under /public, e.g. "/projects/unified-inbox/cover.png" */
+  /** Optional: cover image path under /public, e.g. "/unified-inbox/cover.png" */
   coverImage?: string;
   /** Optional: accent color override for this project card (CSS color value) */
   accentColor?: string;
@@ -57,7 +57,7 @@ export const projects: Project[] = [
     year: "2025",
     roles: ["Product Design", "Design Systems", "Frontend Engineering"],
     figmaUrl: "https://www.figma.com/deck/pjQmKuFEGApisZcb6ifY6s", // ← replace with real share URL
-    coverImage: "/projects/unified-inbox.png",
+    coverImage: "/unified-inbox.png",
     published: true,
   },
   {
@@ -69,7 +69,7 @@ export const projects: Project[] = [
     year: "2024",
     roles: ["Product Design", "UX Design", "Frontend Engineering"],
     figmaUrl: "https://www.figma.com/deck/8DOz3LMYE6CI7Rhh4wpSzm", // ← replace with real share URL
-    coverImage: "/projects/lenz.png",
+    coverImage: "/lenz.png",
     published: true,
   },
   {
@@ -81,7 +81,7 @@ export const projects: Project[] = [
     year: "2023",
     roles: ["Product Design", "UX Design"],
     figmaUrl: "https://www.figma.com/deck/QUiqv1VXvKBCQmyWdqrwjB", // ← replace with real share URL
-    coverImage: "/projects/venmo-split.png",
+    coverImage: "/venmo-split.png",
     published: true,
   },
   {
@@ -96,7 +96,7 @@ export const projects: Project[] = [
     articleCta: "View Article",
     docUrl: "https://www.d1g1t.com/wp-content/uploads/2024/12/d1g1t-Billing-Solution-Sheet.pdf",
     docCta: "Read Solution Sheet",
-    coverImage: "/projects/d1g1t.png",
+    coverImage: "/d1g1t.png",
     published: true,
   },
 ];

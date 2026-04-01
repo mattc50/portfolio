@@ -40,10 +40,21 @@
   margin-bottom: var(--space-12);
   max-width: var(--max-prose);
 
+  & a {
+    border-radius: var(--radius-sm);
+    transition: background-color var(--transition);
+    padding-top: 14px;
+    padding-bottom: 2px;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  
+  & a:hover {
+    background: rgba(0, 0, 0, 0.1);
+  }
+  
   & svg {
-    margin-bottom: -1px;
-    margin-left: 6px;
-    margin-right: 6px;
+    margin-bottom: -3px;
   }
 
   & span {
