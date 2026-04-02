@@ -48,7 +48,7 @@
 
 .Nav_link__AQMuy {
   font-family: var(--font-body), system-ui, sans-serif;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-md);
   letter-spacing: 0.025em;
   color: var(--muted);
   transition: color var(--transition);
