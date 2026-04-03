@@ -64,8 +64,8 @@ export default function RootLayout({
         <Nav />
         <main style={{ paddingTop: "var(--nav-height)" }}>
           {children}
-          <CursorOverlay />
         </main>
+        <CursorOverlay />
       </body>
     </html>
   );
