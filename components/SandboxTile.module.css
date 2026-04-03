@@ -21,19 +21,21 @@
 
 /* Video area — 16:10 aspect */
 .videoWrap {
-  width: 100%;
-  aspect-ratio: 16 / 10;
-  background-color: var(--border);
-  overflow: hidden;
   position: relative;
+  width: 100%;
+  padding-top: 62.5%; /* 16:10 = 62.5%, 16:9 = 56.25% */
+  /* background-color: var(--border); */
+  overflow: hidden;
+  flex-shrink: 0; /* prevent the video from squishing when content grows */
 }
 
 .video {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  /* Keep video paused/static until hover — opacity trick gives a subtle reveal */
   transition: opacity 0.2s ease;
 }
 

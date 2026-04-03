@@ -15,6 +15,7 @@ export interface SandboxItem {
   /** Path to .webm under /public, e.g. "/sandbox/drag-reorder.webm" */
   media: string;
   mediaType: "video" | "image";
+  mode?: "light" | "dark";
   /**
    * Optional poster image shown before the video loads.
    * Path under /public, e.g. "/sandbox/drag-reorder.jpg"
@@ -79,7 +80,7 @@ export const sandboxItems: SandboxItem[] = [
         <p>Then, with JavaScript, I used the <b>Web Animations API</b> to create an animation, as I wanted strict control over its <code>playback rate</code> and visibility into the amount of <code>iterations</code> it had played through.</p>
         <p>I added a button to simulate the user action of dismissing the animation. When pressed, the animation playback rate would be increased 8-fold, and ~ this is where the the real magic happens ~ the timing of the animation would be set to play only until it had played <code>iterations + 1</code> times.</p>
         <p>This logic meant that once the user pressed the button, the animation would speed up and end consistently — no matter where in the animation the user invoked the action.</p>
-        <p>The last part was having another animation take place a sert interval after the user pressed the button, which reset the transformations done on the cube panels to bring back the "square" look.</p>
+        <p>The last part was having another animation take place a set interval after the user pressed the button, which reset the transformations done on the cube panels to bring back the "square" look.</p>
       </>
     ),
     published: true,
@@ -90,6 +91,7 @@ export const sandboxItems: SandboxItem[] = [
     label: "HTML · CSS",
     media: "/sandbox/demo4.webm",
     mediaType: "video",
+    mode: "dark",
     description: (
       <>
         <p>An animation showcasing an AI-powered vehicle marketplace's negotiation flow with <b>manual review</b> enabled (green) or disabled (dark).</p>
@@ -110,7 +112,7 @@ export const sandboxItems: SandboxItem[] = [
         <p>The key to the effect was giving the button surface a transition with the following timing function:</p>
         <code>cubic-bezier(0.5, 2.5, 0.7, 0.7)</code>
         <p>The large <span style={{ fontStyle: "italic", marginRight: "6px" }}>P<sub>1</sub></span>
-          causes the transition effect to "overshoot" — making the transition's final value to slightly exceed where it's suppoesed to end, leading to the "bounce".</p>
+          causes the transition effect to "overshoot" — making the transition's final value slightly exceed where it's suppoesed to end, leading to the "bounce".</p>
       </>
     ),
     published: true,
@@ -214,6 +216,7 @@ export const sandboxItems: SandboxItem[] = [
     label: "Rhino · V-Ray",
     media: "/sandbox/demo10.png",
     mediaType: "image",
+    mode: "dark",
     description: (
       <>
         <p>As my early professional career has unfolded, I wanted to create a 3D model reflecting on different structures which represent moments in my "personal timeline".</p>

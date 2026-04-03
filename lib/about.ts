@@ -4,6 +4,7 @@
 
 export const about = {
   name: "Matt Canabarro",
+  image: "/about/profile-pic.jpg",
   role: "Product Designer & Design Engineer",
 
   // Shown as the large intro paragraph at the top of /about
