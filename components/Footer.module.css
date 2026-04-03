@@ -6,6 +6,7 @@
   gap: 40px;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
 
   & a {
     transition: opacity var(--transition);
@@ -17,7 +18,19 @@
   }
 }
 
-.footer-links {
+.footerInfo {
+  & img {
+    display: inline-block;
+    margin-bottom: -3px;
+    margin-inline: 2px;
+  }
+
+  & > *:last-child {
+    color: var(--muted);
+  }
+}
+
+.footerLinks {
   display: flex;
   gap: 16px;
 }

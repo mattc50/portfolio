@@ -5,6 +5,7 @@ import type { SandboxItem } from "@/lib/sandbox";
 import { SandboxTile } from "./SandboxTile";
 import { SandboxLightbox } from "./SandboxLightbox";
 import styles from "./SandboxGrid.module.css";
+import { createPortal } from "react-dom";
 
 interface SandboxGridProps {
   items: SandboxItem[];
@@ -44,12 +45,13 @@ export function SandboxGrid({ items }: SandboxGridProps) {
         ))}
       </div>
 
-      {active && (
+      {active && createPortal(
         <SandboxLightbox
           item={active.item}
           originRect={active.rect}
           onClose={handleClose}
-        />
+        />,
+        document.body
       )}
     </>
   );
