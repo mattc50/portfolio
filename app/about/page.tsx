@@ -25,7 +25,7 @@ export default function AboutPage() {
   return (
     <section className={styles.section}>
       <div className={`${styles.header} anim-fade-up`}>
-        <span className={styles.eyebrow}>About</span>
+        <img className={styles.image} src={about.image} />
         <h1 className={styles.heading}>{about.intro}</h1>
       </div>
 

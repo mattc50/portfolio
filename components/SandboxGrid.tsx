@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { SandboxItem } from "@/lib/sandbox";
 import { SandboxTile } from "./SandboxTile";
 import { SandboxLightbox } from "./SandboxLightbox";
@@ -17,16 +17,18 @@ interface ActiveItem {
 
 export function SandboxGrid({ items }: SandboxGridProps) {
   const [active, setActive] = useState<ActiveItem | null>(null);
+  const activeTileRef = useRef<HTMLDivElement | null>(null);
 
-  function handleTileClick(item: SandboxItem, rect: DOMRect) {
+  function handleTileClick(item: SandboxItem, rect: DOMRect, tileEl: HTMLDivElement) {
+    activeTileRef.current = tileEl;
     setActive({ item, rect });
-    // Prevent body scroll while lightbox is open
     document.body.style.overflow = "hidden";
   }
 
   function handleClose() {
     setActive(null);
     document.body.style.overflow = "";
+    activeTileRef.current?.focus();
   }
 
   return (

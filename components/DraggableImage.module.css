@@ -1,0 +1,76 @@
+/* ── Slot ───────────────────────────────────────────────────────────────────── */
+
+/*
+ * Slots are invisible and zero-height by default so they don't displace content.
+ * When dragging starts they animate open, making room for the element to land.
+ */
+.slot {
+  width: 100%;
+  overflow: hidden;
+  /* Zero height — no space taken up when not dragging */
+  max-height: 0;
+  opacity: 0;
+  transition:
+    max-height 0.25s ease,
+    opacity 0.2s ease,
+    outline-color 0.15s ease;
+  border-radius: var(--radius-lg);
+  outline: 2px dashed transparent;
+  outline-offset: 4px;
+  margin-bottom: 0;
+}
+
+/* Slot becomes visible while dragging */
+.slotVisible {
+  max-height: 200px; /* large enough for your image — adjust to taste */
+  opacity: 1;
+  margin-bottom: var(--space-5);
+  outline-color: var(--border);
+  position: relative;
+  z-index: 10; /* raise if slots are being obscured */
+}
+
+/* Slot highlights when cursor is over it */
+.slotHovered {
+  outline-color: var(--ink);
+  background-color: color-mix(in srgb, var(--ink) 4%, transparent);
+}
+
+/* ── Handle (element sitting in a slot) ─────────────────────────────────────── */
+.handle {
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  width: fit-content;
+}
+
+.handle:active {
+  cursor: grabbing;
+}
+
+/* ── Ghost (floating clone while dragging) ──────────────────────────────────── */
+.ghost {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 200;
+  pointer-events: none; /* let pointer events fall through to slot hit-testing */
+  cursor: grabbing;
+  user-select: none;
+
+  /* Rotation + slight scale-up while dragging */
+  transform-origin: center center;
+  rotate: 5deg;
+  scale: 1.04;
+
+  /* Subtle shadow to lift it off the page */
+  filter: drop-shadow(0 8px 24px rgba(17, 16, 16, 0.18));
+
+  /* Smooth the rotation snapping in/out */
+  transition:
+    rotate 0.15s ease,
+    scale 0.15s ease,
+    filter 0.15s ease;
+
+  z-index: 200; /* raise this to sit above whatever is covering it */
+}
