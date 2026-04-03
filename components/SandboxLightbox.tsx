@@ -143,7 +143,9 @@ export function SandboxLightbox({ item, originRect, onClose }: SandboxLightboxPr
               playsInline
               autoPlay
               className={styles.video}
-            />
+            >
+              <source src={item.media} type={item.mimeType ?? "video/mp4"} />
+            </video>
           ) : (
             <img
               src={item.media}
