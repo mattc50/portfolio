@@ -1,0 +1,175 @@
+/* ── Backdrop ───────────────────────────────────────────────────────────────── */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  padding-top: calc(var(--space-6) + var(--nav-height));
+
+  background-color: rgba(17, 16, 16, 0);
+  transition: background-color 0.35s ease;
+}
+
+.backdrop.open {
+  background-color: rgba(17, 16, 16, 0.6);
+}
+
+.backdrop.exit {
+  background-color: rgba(17, 16, 16, 0);
+}
+
+/* ── Card ───────────────────────────────────────────────────────────────────── */
+.card {
+  width: 100%;
+  max-width: 720px;
+  background-color: var(--canvas);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  border: 1px solid var(--border);
+
+  /* Enter state: card sits at the tile's position/scale */
+  transform: var(--enter-transform);
+  opacity: 0;
+  transition:
+    transform 0.4s cubic-bezier(0.32, 0.72, 0, 1),
+    opacity 0.3s ease;
+  
+  max-height: calc(100vh - var(--nav-height) - var(--space-12));
+  display: flex;
+  flex-direction: column;
+}
+
+/* Open state: card expands to center */
+.open .card {
+  transform: translate(0, 0) scale(1);
+  opacity: 1;
+}
+
+/* Exit state: card shrinks back */
+.exit .card {
+  transform: var(--enter-transform);
+  opacity: 0;
+}
+
+/* ── Video ──────────────────────────────────────────────────────────────────── */
+/* .videoWrap {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  background-color: var(--border);
+  overflow: hidden;
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+} */
+
+.videoWrap {
+  position: relative;
+  width: 100%;
+  padding-top: 62.5%; /* 16:10 = 62.5%, 16:9 = 56.25% */
+  background-color: var(--border);
+  overflow: hidden;
+  flex-shrink: 0; /* prevent the video from squishing when content grows */
+}
+
+.video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ── Content ────────────────────────────────────────────────────────────────── */
+.content {
+  padding: var(--space-5) var(--space-6) var(--space-6);
+  border-top: 1px solid var(--border);
+
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.contentHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.title {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: var(--font-size-xl);
+  line-height: 1.2;
+  margin-bottom: var(--space-1);
+}
+
+.label {
+  font-family: var(--font-mono), monospace;
+  font-size: var(--font-size-2xs);
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+
+.description {
+  font-size: var(--font-size-sm);
+  line-height: 1.7;
+  color: var(--muted);
+  /* max-width: 56ch; */
+
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+
+  & > b {
+    font-size: var(--font-size-lg);
+    color: var(--ink);
+  }
+  
+  & > p {
+    margin-top: var(--space-4);
+  }
+  
+  & > p b {
+    color: var(--ink);
+  }
+
+  & > p:not(:last-child) {
+    margin-bottom: var(--space-4);
+  }
+
+  & a {
+    text-decoration: underline;
+    color: var(--ink);
+  }
+}
+
+/* ── Close button ───────────────────────────────────────────────────────────── */
+.closeBtn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  background: none;
+  cursor: pointer;
+  color: var(--muted);
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.closeBtn:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
