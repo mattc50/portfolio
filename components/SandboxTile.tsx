@@ -7,7 +7,7 @@ import styles from "./SandboxTile.module.css";
 interface SandboxTileProps {
   item: SandboxItem;
   index: number;
-  onClick: (item: SandboxItem, rect: DOMRect) => void;
+  onClick: (item: SandboxItem, rect: DOMRect, tileEl: HTMLDivElement) => void;
 }
 
 export function SandboxTile({ item, index, onClick }: SandboxTileProps) {
@@ -29,7 +29,7 @@ export function SandboxTile({ item, index, onClick }: SandboxTileProps) {
   function handleClick() {
     if (!tileRef.current) return;
     const rect = tileRef.current.getBoundingClientRect();
-    onClick(item, rect);
+    onClick(item, rect, tileRef.current);
   }
 
   return (
