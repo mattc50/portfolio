@@ -1,0 +1,64 @@
+.tile {
+  cursor: pointer;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background-color: var(--canvas);
+  transition: border-color var(--transition), transform 0.2s ease, box-shadow 0.2s ease;
+  outline: none;
+}
+
+.tile:hover,
+.tile:focus-visible {
+  border-color: var(--muted);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(17, 16, 16, 0.08);
+}
+
+.tile:focus-visible {
+  box-shadow: 0 0 0 2px var(--ink);
+}
+
+/* Video area — 16:10 aspect */
+.videoWrap {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  background-color: var(--border);
+  overflow: hidden;
+  position: relative;
+}
+
+.video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  /* Keep video paused/static until hover — opacity trick gives a subtle reveal */
+  transition: opacity 0.2s ease;
+}
+
+/* Footer */
+.footer {
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  border-top: 1px solid var(--border);
+}
+
+.title {
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: var(--font-size-sm);
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.label {
+  font-family: var(--font-mono), monospace;
+  font-size: var(--font-size-2xs);
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
