@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev:ws": "tsx server/cursor-server.ts",
+    "dev": "concurrently \"next dev\" \"npm run dev:ws\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -11,14 +12,17 @@
   "dependencies": {
     "next": "14.2.5",
     "react": "^18",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "ws": "^8.20.0"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "concurrently": "^9.2.1",
     "eslint": "^8",
     "eslint-config-next": "14.2.5",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }
