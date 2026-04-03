@@ -27,6 +27,8 @@ export function CursorOverlay() {
             left: `${cursor.displayX * 100}%`,
             top: `${cursor.displayY * 100}%`,
             willChange: "left, top",
+            zIndex: 9999,
+
           }}
         >
           <svg
