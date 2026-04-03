@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import type { SandboxItem } from "@/lib/sandbox";
 import styles from "./SandboxTile.module.css";
 
@@ -32,6 +32,18 @@ export function SandboxTile({ item, index, onClick }: SandboxTileProps) {
     onClick(item, rect, tileRef.current);
   }
 
+  // useEffect(() => {
+  //   const video = videoRef.current;
+  //   if (!video) return;
+
+  //   function onLoaded() {
+  //     video!.currentTime = 0.1;
+  //   }
+
+  //   video.addEventListener("loadeddata", onLoaded);
+  //   return () => video.removeEventListener("loadeddata", onLoaded);
+  // }, []);
+
   return (
     <div
       ref={tileRef}
@@ -54,9 +66,11 @@ export function SandboxTile({ item, index, onClick }: SandboxTileProps) {
             muted
             loop
             playsInline
-            preload="metadata"
+            preload="auto"
             className={styles.video}
-          />
+          >
+            <source src={item.media} type={item.mimeType ?? "video/mp4"} />
+          </video>
         ) : (
           <img
             src={item.media}

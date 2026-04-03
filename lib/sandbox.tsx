@@ -14,7 +14,9 @@ export interface SandboxItem {
   label?: string;
   /** Path to .webm under /public, e.g. "/sandbox/drag-reorder.webm" */
   media: string;
+  mediaMp4?: string;
   mediaType: "video" | "image";
+  mimeType?: "video/mp4" | "video/webm" | "video/quicktime";
   mode?: "light" | "dark";
   /**
    * Optional poster image shown before the video loads.
@@ -34,7 +36,8 @@ export const sandboxItems: SandboxItem[] = [
     id: "skeuomorphic-button",
     title: "Skeuomorphic button",
     label: "CSS · React",
-    media: "/sandbox/demo1.webm",
+    media: "/sandbox/demo1.mp4",
+    poster: "/sandbox/demo1.jpg",
     mediaType: "video",
     description: (
       <>
@@ -48,7 +51,8 @@ export const sandboxItems: SandboxItem[] = [
     id: "timeline-with-date-as-progress",
     title: "Timeline with date as progress",
     label: "CSS · JavaScript",
-    media: "/sandbox/demo2.webm",
+    media: "/sandbox/demo2.mp4",
+    poster: "/sandbox/demo2.jpg",
     mediaType: "video",
     description: (
       <>
@@ -67,7 +71,8 @@ export const sandboxItems: SandboxItem[] = [
     id: "rotating-cube-with-stop",
     title: "Rotating cube with stop",
     label: "CSS · JavaScript · Web Animations API",
-    media: "/sandbox/demo3.webm",
+    media: "/sandbox/demo3.mp4",
+    poster: "/sandbox/demo3.jpg",
     mediaType: "video",
     description: (
       <>
@@ -89,7 +94,8 @@ export const sandboxItems: SandboxItem[] = [
     id: "negotiation-mode-animation",
     title: "Negotiation mode animation",
     label: "HTML · CSS",
-    media: "/sandbox/demo4.webm",
+    media: "/sandbox/demo4.mp4",
+    poster: "/sandbox/demo4.jpg",
     mediaType: "video",
     mode: "dark",
     description: (
@@ -104,7 +110,8 @@ export const sandboxItems: SandboxItem[] = [
     id: "bouncy-button",
     title: "Bouncy button",
     label: "HTML · CSS",
-    media: "/sandbox/demo5.webm",
+    media: "/sandbox/demo5.mp4",
+    poster: "/sandbox/demo5.jpg",
     mediaType: "video",
     description: (
       <>
@@ -121,7 +128,8 @@ export const sandboxItems: SandboxItem[] = [
     id: "source-to-highlight-effect",
     title: "Source-to-highlight effect",
     label: "CSS · React",
-    media: "/sandbox/demo6.webm",
+    media: "/sandbox/demo6.mp4",
+    poster: "/sandbox/demo6.jpg",
     mediaType: "video",
     description: (
       <>
@@ -139,7 +147,8 @@ export const sandboxItems: SandboxItem[] = [
     id: "automatic-source-detection-on-link-paste",
     title: "Automatic source detection on link paste",
     label: "CSS · React",
-    media: "/sandbox/demo7.webm",
+    media: "/sandbox/demo7.mp4",
+    poster: "/sandbox/demo7.jpg",
     mediaType: "video",
     description: (
       <>
@@ -172,7 +181,8 @@ export const sandboxItems: SandboxItem[] = [
     id: "icon-gradient-along-a-path",
     title: "Icon gradient along a path",
     label: "CSS · React",
-    media: "/sandbox/demo8.webm",
+    media: "/sandbox/demo8.mp4",
+    poster: "/sandbox/demo8.jpg",
     mediaType: "video",
     description: (
       <>
@@ -186,7 +196,8 @@ export const sandboxItems: SandboxItem[] = [
     id: "mobile-animation",
     title: "Mobile animation",
     label: "CSS · React",
-    media: "/sandbox/demo11.webm",
+    media: "/sandbox/demo11.mp4",
+    poster: "/sandbox/demo11.jpg",
     mediaType: "video",
     description: (
       <>
