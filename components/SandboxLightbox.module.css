@@ -55,8 +55,9 @@
 /* Exit state: card shrinks back */
 .exit .card {
   /* transform: var(--enter-transform); */
-  transform: var(--enter-transform);
+  transform: translate(0, 0) scale(0.96);
   opacity: 0;
+  transform: opacity var(--transition);
 }
 
 /* ── Video ──────────────────────────────────────────────────────────────────── */

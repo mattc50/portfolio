@@ -48,21 +48,16 @@ export const sandboxItems: SandboxItem[] = [
     published: true,
   },
   {
-    id: "timeline-with-date-as-progress",
-    title: "Timeline with date as progress",
-    label: "CSS · JavaScript",
-    media: "/sandbox/demo2.mp4",
-    poster: "/sandbox/demo2.jpg",
-    mediaType: "video",
+    id: "timeline-model",
+    title: "Timeline model",
+    label: "Rhino · V-Ray",
+    media: "/sandbox/demo10.png",
+    mediaType: "image",
+    mode: "dark",
     description: (
       <>
-        <p>I wanted to make a curving timeline that showed progress from a start date to a finish date.</p>
-        <p>First, I created the SVG stroke for the track, then duplicated it and placed one on top of the other. The bottom one became the <b>track</b> while the top one became the <b>progress</b>.</p>
-        <p>I calculated the "percent completion" of time from the current date to the finish date, relative to the days between the start and finish.</p>
-        <p>I then used this percent to calculate a <code>strokeDashoffset</code> for the <b>progress</b> path, creating the visual of the progress path being filled along the curving track.</p>
-        <b>Purpose</b>
-        <p>I built this for an accessible inspection app to be used by students, and wanted to make something more engaging than a static progress indicator.</p>
-        <p>Additionally, the timeline was supposed to show events that the user logged throughout their tenancy, so the ability to have the timeline take up both horizonatl and vertical space meant that "flags" for those events could be shown without making the timeline too cramped.</p>
+        <p>As my early professional career has unfolded, I hand-built a 3D model reflecting on different structures which represent moments in my "personal timeline".</p>
+        <p>From left to right: my high school; my parents' house (where I spent most of my formative years); <a href="https://www.google.com/maps/place/McGraw+Tower/@42.4475739,-76.4876288,17z/data=!3m1!4b1!4m6!3m5!1s0x89d0818bd4d85755:0x19299d4d6ca11ed1!8m2!3d42.4475739!4d-76.4850539!16zL20vMGducGZj?entry=ttu&g_ep=EgoyMDI2MDMzMS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer">McGraw Tower</a> (the famous clocktower of Cornell); <a href="google.com/maps/place/Martha+Van+Rensselaer+Hall/@42.4475739,-76.4876288,17z/data=!4m6!3m5!1s0x89d0833ba1a7a891:0x24ebe0ce85027b0c!8m2!3d42.449771!4d-76.4791325!16s%2Fg%2F11tfb3b_bx?entry=ttu&g_ep=EgoyMDI2MDMzMS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer">Martha van Rensselaer Hall</a> (also known as MVR; lots of hours spent in its design studios); and the <a href="https://www.google.com/maps/place/CN+Tower/@43.6425662,-79.3896317,17z/data=!3m2!4b1!5s0x882b34d819a55ff7:0xad7cf7bcaf4e239b!4m6!3m5!1s0x882b34d68bf33a9b:0x15edd8c4de1c7581!8m2!3d43.6425662!4d-79.3870568!16zL20vMDF0d3M?entry=ttu&g_ep=EgoyMDI2MDMzMS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer">CN Tower</a> (architectural icon of Toronto, where my post-college career began — although I was working remotely from the US)</p>
       </>
     ),
     published: true,
@@ -91,17 +86,21 @@ export const sandboxItems: SandboxItem[] = [
     published: true,
   },
   {
-    id: "negotiation-mode-animation",
-    title: "Negotiation mode animation",
-    label: "HTML · CSS",
-    media: "/sandbox/demo4.mp4",
-    poster: "/sandbox/demo4.jpg",
+    id: "timeline-with-date-as-progress",
+    title: "Timeline with date as progress",
+    label: "CSS · JavaScript",
+    media: "/sandbox/demo2.mp4",
+    poster: "/sandbox/demo2.jpg",
     mediaType: "video",
-    mode: "dark",
     description: (
       <>
-        <p>An animation showcasing an AI-powered vehicle marketplace's negotiation flow with <b>manual review</b> enabled (green) or disabled (dark).</p>
-        <p>Made entirely with HTML and CSS.</p>
+        <p>I wanted to make a curving timeline that showed progress from a start date to a finish date.</p>
+        <p>First, I created the SVG stroke for the track, then duplicated it and placed one on top of the other. The bottom one became the <b>track</b> while the top one became the <b>progress</b>.</p>
+        <p>I calculated the "percent completion" of time from the current date to the finish date, relative to the days between the start and finish.</p>
+        <p>I then used this percent to calculate a <code>strokeDashoffset</code> for the <b>progress</b> path, creating the visual of the progress path being filled along the curving track.</p>
+        <b>Purpose</b>
+        <p>I built this for an accessible inspection app to be used by students, and wanted to make something more engaging than a static progress indicator.</p>
+        <p>Additionally, the timeline was supposed to show events that the user logged throughout their tenancy, so the ability to have the timeline take up both horizonatl and vertical space meant that "flags" for those events could be shown without making the timeline too cramped.</p>
       </>
     ),
     published: true,
@@ -120,6 +119,22 @@ export const sandboxItems: SandboxItem[] = [
         <code>cubic-bezier(0.5, 2.5, 0.7, 0.7)</code>
         <p>The large <span style={{ fontStyle: "italic", marginRight: "6px" }}>P<sub>1</sub></span>
           causes the transition effect to "overshoot" — making the transition's final value slightly exceed where it's suppoesed to end, leading to the "bounce".</p>
+      </>
+    ),
+    published: true,
+  },
+  {
+    id: "negotiation-mode-animation",
+    title: "Negotiation mode animation",
+    label: "HTML · CSS",
+    media: "/sandbox/demo4.mp4",
+    poster: "/sandbox/demo4.jpg",
+    mediaType: "video",
+    mode: "dark",
+    description: (
+      <>
+        <p>An animation showcasing an AI-powered vehicle marketplace's negotiation flow with <b>manual review</b> enabled (green) or disabled (dark).</p>
+        <p>Made entirely with HTML and CSS.</p>
       </>
     ),
     published: true,
@@ -221,21 +236,7 @@ export const sandboxItems: SandboxItem[] = [
     ),
     published: true,
   },
-  {
-    id: "timeline-model",
-    title: "Timeline model",
-    label: "Rhino · V-Ray",
-    media: "/sandbox/demo10.png",
-    mediaType: "image",
-    mode: "dark",
-    description: (
-      <>
-        <p>As my early professional career has unfolded, I wanted to create a 3D model reflecting on different structures which represent moments in my "personal timeline".</p>
-        <p>From left to right: my high school; my parents' house (where I spent most of my formative years); <a href="https://www.google.com/maps/place/McGraw+Tower/@42.4475739,-76.4876288,17z/data=!3m1!4b1!4m6!3m5!1s0x89d0818bd4d85755:0x19299d4d6ca11ed1!8m2!3d42.4475739!4d-76.4850539!16zL20vMGducGZj?entry=ttu&g_ep=EgoyMDI2MDMzMS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer">McGraw Tower</a> (the famous clocktower of Cornell); <a href="google.com/maps/place/Martha+Van+Rensselaer+Hall/@42.4475739,-76.4876288,17z/data=!4m6!3m5!1s0x89d0833ba1a7a891:0x24ebe0ce85027b0c!8m2!3d42.449771!4d-76.4791325!16s%2Fg%2F11tfb3b_bx?entry=ttu&g_ep=EgoyMDI2MDMzMS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer">Martha van Rensselaer Hall</a> (also known as MVR; lots of hours spent in its design studios); and the <a href="https://www.google.com/maps/place/CN+Tower/@43.6425662,-79.3896317,17z/data=!3m2!4b1!5s0x882b34d819a55ff7:0xad7cf7bcaf4e239b!4m6!3m5!1s0x882b34d68bf33a9b:0x15edd8c4de1c7581!8m2!3d43.6425662!4d-79.3870568!16zL20vMDF0d3M?entry=ttu&g_ep=EgoyMDI2MDMzMS4wIKXMDSoASAFQAw%3D%3D" target="_blank" rel="noopener noreferrer">CN Tower</a> (architectural icon of Toronto, where my post-college career began — although I was working remotely from the US)</p>
-      </>
-    ),
-    published: true,
-  },
+
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

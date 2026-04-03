@@ -5,10 +5,15 @@ import styles from "./Footer.module.css";
 export function Footer() {
   return (
     <footer className={styles.footer}>
-      <span>
-        © Matthew Canabarro 2026
-      </span>
-      <div className={styles["footer-links"]}>
+      <div className={styles.footerInfo}>
+        <span>
+          © Matthew Canabarro 2026
+        </span><br />
+        <span>
+          Built with <img src="/footer/heart.svg" /> <span style={{ whiteSpace: "nowrap" }}>using Next.js & TypeScript</span>
+        </span>
+      </div>
+      <div className={styles.footerLinks}>
         <a href="https://www.linkedin.com/in/matthew-canabarro/">
           <img src="/footer/linkedin.svg" />
         </a>
