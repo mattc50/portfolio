@@ -43,7 +43,7 @@
 .Nav_links__8Axcs {
   display: flex;
   align-items: center;
-  gap: var(--space-8);
+  gap: var(--space-6);
 }
 
 .Nav_link__AQMuy {
@@ -313,6 +313,14 @@ h1, h2, h3, h4 {
   font-family: var(--font-display), Georgia, serif;
   letter-spacing: -0.02em;
   line-height: 1.05;
+}
+
+code {
+  font-size: var(--font-size-xs);
+  color: var(--accent);
+  background: var(--border);
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
 }
 
 /* ─── Selection ──────────────────────────────────────────────────────────────── */

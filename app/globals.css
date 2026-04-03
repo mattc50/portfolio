@@ -110,6 +110,14 @@ h1, h2, h3, h4 {
   line-height: 1.05;
 }
 
+code {
+  font-size: var(--font-size-xs);
+  color: var(--accent);
+  background: var(--border);
+  padding: 2px 4px;
+  border-radius: var(--radius-sm);
+}
+
 /* ─── Selection ──────────────────────────────────────────────────────────────── */
 ::selection {
   background-color: var(--ink);
