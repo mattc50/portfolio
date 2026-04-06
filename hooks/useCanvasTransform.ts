@@ -164,8 +164,67 @@ export function useCanvasTransform(containerRef: React.RefObject<HTMLElement>) {
       }
     };
 
+    let lastTouchDist = 0;
+    let lastMidpoint = { x: 0, y: 0 };
+    let lastSingleTouch = { x: 0, y: 0 };
+
+    const getTouchDist = (a: Touch, b: Touch) =>
+      Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY);
+
+    const getMidpoint = (a: Touch, b: Touch, rect: DOMRect) => ({
+      x: (a.clientX + b.clientX) / 2 - rect.left,
+      y: (a.clientY + b.clientY) / 2 - rect.top,
+    });
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        lastTouchDist = getTouchDist(e.touches[0], e.touches[1]);
+        const rect = el.getBoundingClientRect();
+        lastMidpoint = getMidpoint(e.touches[0], e.touches[1], rect);
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      e.preventDefault(); // 👈 moved up, applies to both cases
+
+      const rect = el.getBoundingClientRect();
+
+      if (e.touches.length === 2) {
+        const dist = getTouchDist(e.touches[0], e.touches[1]);
+        const midpoint = getMidpoint(e.touches[0], e.touches[1], rect);
+        const scaleDelta = dist / lastTouchDist;
+        lastTouchDist = dist;
+
+        setTransform((prev) => {
+          const newScale = Math.min(Math.max(prev.scale * scaleDelta, 0.1), 10);
+          const zoomedX = midpoint.x - (midpoint.x - prev.x) * (newScale / prev.scale);
+          const zoomedY = midpoint.y - (midpoint.y - prev.y) * (newScale / prev.scale);
+          const dx = midpoint.x - lastMidpoint.x;
+          const dy = midpoint.y - lastMidpoint.y;
+          lastMidpoint = midpoint;
+          return clampTransform(zoomedX + dx, zoomedY + dy, newScale, rect.width, rect.height);
+        });
+      } else if (e.touches.length === 1) {
+        const touch = e.touches[0];
+        const dx = touch.clientX - lastSingleTouch.x;
+        const dy = touch.clientY - lastSingleTouch.y;
+        lastSingleTouch = { x: touch.clientX, y: touch.clientY };
+
+        setTransform((prev) =>
+          clampTransform(prev.x + dx, prev.y + dy, prev.scale, rect.width, rect.height)
+        );
+      }
+    };
+
     el.addEventListener("wheel", handler, { passive: false });
-    return () => el.removeEventListener("wheel", handler);
+    el.addEventListener("touchstart", handleTouchStart, { passive: true });
+    el.addEventListener("touchmove", handleTouchMove, { passive: false }); // non-passive to preventDefault
+
+    return () => {
+      el.removeEventListener("wheel", handler);
+      el.removeEventListener("touchstart", handleTouchStart);
+      el.removeEventListener("touchmove", handleTouchMove);
+    }
   }, [containerRef]);
 
   return {

@@ -162,6 +162,32 @@ export function useMultiplayerCursors(
       }, THROTTLE_MS);
     };
 
+    const handleTouchMove = (e: TouchEvent) => {
+      const touch = e.touches[0];
+      if (!touch) return;
+
+      clearTimeout(throttleTimer.current);
+      throttleTimer.current = setTimeout(() => {
+        const container = containerRef?.current;
+        if (!container) return;
+
+        const rect = container.getBoundingClientRect();
+        const x = (touch.clientX - rect.left - (transformRef?.current?.x ?? 0)) / (transformRef?.current?.scale ?? 1);
+        const y = (touch.clientY - rect.top - (transformRef?.current?.y ?? 0)) / (transformRef?.current?.scale ?? 1);
+
+        socket?.send(
+          JSON.stringify({
+            type: "move",
+            x,
+            y,
+            color: identity.current.color,
+            name: identity.current.name,
+            id: identity.current.id,
+          })
+        );
+      }, THROTTLE_MS);
+    };
+
     const handleVisibilityChange = () => {
       if (document.hidden) sendLeave();
     };
@@ -169,12 +195,14 @@ export function useMultiplayerCursors(
     const handleBeforeUnload = () => sendLeave();
 
     window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("touchmove", handleTouchMove, { passive: true });
     window.addEventListener("beforeunload", handleBeforeUnload);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       clearTimeout(throttleTimer.current);
       window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("beforeunload", handleBeforeUnload);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       sendLeave();
