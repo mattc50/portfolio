@@ -133,6 +133,7 @@ export function SandboxLightbox({ item, originRect, onClose }: SandboxLightboxPr
               />
             </svg>
           </button>
+          {/* {item.element && item.element} */}
           {item.mediaType === "video" ? (
             <video
               ref={videoRef}

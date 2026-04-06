@@ -18,7 +18,8 @@ const THROTTLE_MS = 8;
 export function useMultiplayerCursors(
   socket: PartySocket | null,
   onMessage?: (data: Record<string, any>) => void,
-  containerRef?: React.RefObject<HTMLDivElement>
+  containerRef?: React.RefObject<HTMLDivElement>,
+  transformRef?: React.RefObject<{ x: number; y: number; scale: number }> // 👈 add
 ) {
   const [cursors, setCursors] = useState<Record<string, RemoteCursor>>({});
   const identity = useRef(getOrCreateIdentity());
@@ -139,17 +140,14 @@ export function useMultiplayerCursors(
       clearTimeout(throttleTimer.current);
       throttleTimer.current = setTimeout(() => {
         const container = containerRef?.current;
-        let x: number;
-        let y: number;
+        if (!container) return;
 
-        if (container) {
-          const rect = container.getBoundingClientRect();
-          x = (e.clientX - rect.left) / rect.width;
-          y = (e.clientY - rect.top) / rect.height;
-        } else {
-          x = e.clientX / window.innerWidth;
-          y = e.clientY / window.innerHeight;
-        }
+        const rect = container.getBoundingClientRect();
+        const t = transformRef?.current ?? { x: 0, y: 0, scale: 1 };
+
+        // Convert screen position → canvas-space
+        const x = (e.clientX - rect.left - t.x) / t.scale;
+        const y = (e.clientY - rect.top - t.y) / t.scale;
 
         socket?.send(
           JSON.stringify({

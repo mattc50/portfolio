@@ -21,7 +21,7 @@ export function SandboxGrid({ items }: SandboxGridProps) {
   const activeTileRef = useRef<HTMLDivElement | null>(null);
 
   function handleTileClick(item: SandboxItem, rect: DOMRect, tileEl: HTMLDivElement) {
-    console.log("handling click")
+    // console.log("handling click")
     activeTileRef.current = tileEl;
     setActive({ item, rect });
     document.body.style.overflow = "hidden";

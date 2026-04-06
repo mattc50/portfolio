@@ -1,6 +1,6 @@
 import type { CanvasElement } from "@/hooks/useCanvasElements";
 import type { RemoteCursor } from "@/hooks/useMultiplayerCursors";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 
 interface Props {
   element: CanvasElement;
@@ -25,32 +25,48 @@ export function DraggableRect({
   const lockColor = lockingCursor?.color ?? "#888";
 
   const isDragging = useRef(false);
+  // Keep latest callbacks + element in refs so window listeners don't go stale
+  const onPointerMoveRef = useRef(onPointerMove);
+  const onPointerUpRef = useRef(onPointerUp);
+  const elementRef = useRef(element);
+  onPointerMoveRef.current = onPointerMove;
+  onPointerUpRef.current = onPointerUp;
+  elementRef.current = element;
+
+  useEffect(() => {
+    const handleWindowPointerMove = (e: PointerEvent) => {
+      // console.log("window pointermove", { isDragging: isDragging.current });
+      if (!isDragging.current) return;
+      // Cast to React.PointerEvent shape — the fields we use are identical
+      onPointerMoveRef.current(e as unknown as React.PointerEvent, elementRef.current);
+    };
+
+    const handleWindowPointerUp = (e: PointerEvent) => {
+      if (!isDragging.current) return;
+      isDragging.current = false;
+      onPointerUpRef.current(e as unknown as React.PointerEvent, elementRef.current);
+    };
+
+    window.addEventListener("pointermove", handleWindowPointerMove);
+    window.addEventListener("pointerup", handleWindowPointerUp);
+    return () => {
+      window.removeEventListener("pointermove", handleWindowPointerMove);
+      window.removeEventListener("pointerup", handleWindowPointerUp);
+    };
+  }, []); // empty — refs keep everything current
 
   const handlePointerDown = (e: React.PointerEvent) => {
+    // console.log("pointerdown on rect", { lockedBy: element.lockedBy, myId });
     if (element.lockedBy && element.lockedBy !== myId) return;
+    e.stopPropagation(); // prevent canvas pan from triggering
     isDragging.current = true;
+    // console.log("isDragging set to true");
     onPointerDown(e, element);
-  };
-
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!isDragging.current) return;
-    onPointerMove(e, element);
-  };
-
-  const handlePointerUp = (e: React.PointerEvent) => {
-    if (!isDragging.current) return;
-    isDragging.current = false;
-    onPointerUp(e, element);
   };
 
   return (
     <div
-      // onPointerDown={(e) => onPointerDown(e, element)}
-      // onPointerMove={(e) => onPointerMove(e, element)}
-      // onPointerUp={(e) => onPointerUp(e, element)}
       onPointerDown={handlePointerDown}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
       style={{
         position: "absolute",
         left: element.x,
@@ -74,7 +90,6 @@ export function DraggableRect({
           : "0 2px 8px rgba(0,0,0,0.15)",
       }}
     >
-      {/* Lock indicator */}
       {isLockedByOther && lockingCursor && (
         <div
           style={{
