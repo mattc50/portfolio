@@ -70,6 +70,7 @@ export function DraggableRect({
   return (
     <div
       onPointerDown={handlePointerDown}
+      onTouchStart={(e) => e.stopPropagation()}
       style={{
         position: "absolute",
         left: element.x,
@@ -113,7 +114,6 @@ export function DraggableRect({
       )}
       <button
         onPointerDown={(e) => e.stopPropagation()} // prevent triggering drag
-        onTouchStart={(e) => e.stopPropagation()}
         onClick={onRectClick}
         style={{
           width: "max-content",
