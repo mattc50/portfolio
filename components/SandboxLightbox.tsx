@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { SandboxItem } from "@/lib/sandbox";
 import styles from "./SandboxLightbox.module.css";
+import GuestbookForm from "./GuestbookForm";
 
 interface SandboxLightboxProps {
   item: SandboxItem;
@@ -165,22 +166,27 @@ export function SandboxLightbox({ item, originRect, onClose }: SandboxLightboxPr
               <h2 className={styles.title}>{item.id === "multiplayer" ? "Sign the guestbook!" : item.title}</h2>
               {item.label && item.id !== "multiplayer" && <span className={styles.label}>{item.label}</span>}
             </div>
-            {/* <button
-              className={styles.closeBtn}
-              onClick={handleClose}
-              aria-label="Close"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <path
-                  d="M2 2L14 14M14 2L2 14"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </button> */}
+            {item.id === "multiplayer" && (
+              <button
+                className={styles.closeBtn}
+                onClick={handleClose}
+                aria-label="Close"
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path
+                    d="M2 2L14 14M14 2L2 14"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            )}
           </div>
-          <p className={styles.description}>{item.description}</p>
+          {item.id === "multiplayer"
+            ? <GuestbookForm onClose={onClose} />
+            : <p className={styles.description}>{item.description}</p>
+          }
         </div>
       </div>
     </div>

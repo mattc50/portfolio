@@ -1,0 +1,24 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.input {
+  background-color: var(--canvas);
+  color: var(--muted);
+  border-radius: 6px;
+  border: 1px solid var(--muted);
+  padding: var(--space-3);
+}
+
+.button {
+  padding: 12px;
+  font-weight: 500;
+  font-size: var(--font-size-sm);
+  background: rgba(0, 0, 0, 0.03);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+}
