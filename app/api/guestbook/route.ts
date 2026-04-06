@@ -9,12 +9,20 @@ import { createClient } from '@libsql/client';
 //   created_at INTEGER NOT NULL
 // )`);
 
-const db = createClient({
-  url: process.env.TURSO_DB_URL!,
-  authToken: process.env.TURSO_AUTH_TOKEN!,
-});
+// const db = createClient({
+//   url: process.env.TURSO_DB_URL!,
+//   authToken: process.env.TURSO_AUTH_TOKEN!,
+// });
+
+function getDb() {
+  return createClient({
+    url: process.env.TURSO_DB_URL!,
+    authToken: process.env.TURSO_AUTH_TOKEN!,
+  });
+}
 
 export async function GET() {
+  const db = getDb();
   const { rows } = await db.execute(
     'SELECT * FROM entries ORDER BY created_at DESC'
   );
@@ -23,6 +31,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const db = getDb();
   try {
     const { name } = await req.json();
     if (!name) return Response.json({ error: 'Missing fields' }, { status: 400 });
