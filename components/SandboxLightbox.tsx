@@ -106,7 +106,7 @@ export function SandboxLightbox({ item, originRect, onClose }: SandboxLightboxPr
       onTransitionEnd={handleTransitionEnd}
       aria-modal="true"
       role="dialog"
-      ariaLabel={item.title}
+      aria-label={item.title}
     >
       {/* Card — stops click propagation so clicking inside doesn't close */}
       <div
@@ -124,7 +124,7 @@ export function SandboxLightbox({ item, originRect, onClose }: SandboxLightboxPr
             <button
               className={`${styles.closeBtn}${item.mode === "dark" ? ` ${styles.lightBtn}` : ""}`}
               onClick={handleClose}
-              ariaLabel="Close"
+              aria-label="Close"
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                 <path
@@ -170,7 +170,7 @@ export function SandboxLightbox({ item, originRect, onClose }: SandboxLightboxPr
               <button
                 className={styles.closeBtn}
                 onClick={handleClose}
-                ariaLabel="Close"
+                aria-label="Close"
               >
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                   <path
