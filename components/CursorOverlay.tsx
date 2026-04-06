@@ -2,7 +2,7 @@ import type { RemoteCursor } from "@/hooks/useMultiplayerCursors";
 
 interface Props {
   cursors: Record<string, RemoteCursor> | {};
-  transform: { x: number; y: number; scale: number };
+  transform: { x: number; y: number; scale: number } | {};
 }
 
 export function CursorOverlay({ cursors = {}, transform }: Props) {
