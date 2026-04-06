@@ -25,16 +25,22 @@ export function MultiplayerCanvas({ onRectClick }: Props) {
   const socket = usePartySocket({
     host: process.env.NEXT_PUBLIC_PARTYKIT_HOST!,
     room,
-    onMessage(event) {
-      const data = JSON.parse(event.data);
-      handleMessage(data);
-    },
   });
 
-  const { elements, handleMessage, onPointerDown, onPointerMove, onPointerUp } =
-    useCanvasElements(socket, identity.current.id, containerRef, canvasTransform.transformRef);
+  const { cursors, sendCursorPosition } = useMultiplayerCursors(
+    socket,
+    containerRef,
+    canvasTransform.transformRef,
+  );
 
-  const cursors = useMultiplayerCursors(socket, handleMessage, containerRef, canvasTransform.transformRef);
+  const { elements, onPointerDown, onPointerMove, onPointerUp } =
+    useCanvasElements(
+      socket,
+      identity.current.id,
+      containerRef,
+      canvasTransform.transformRef,
+      sendCursorPosition
+    );
 
   // Space bar pan mode
   useEffect(() => {

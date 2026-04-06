@@ -25,36 +25,35 @@ export function useCanvasElements(
   const throttleTimer = useRef<ReturnType<typeof setTimeout>>();
   const isDraggingId = useRef<string | null>(null); // 👈 track which element we're dragging
 
-  const handleMessage = useCallback(
-    (data: Record<string, any>) => {
+  useEffect(() => {
+    if (!socket) return;
+    const handler = (event: MessageEvent) => {
+      const data = JSON.parse(event.data);
       if (data.type === "init") {
         setElements(data.elements ?? {});
-        return;
       }
       if (data.type === "rect:locked") {
         setElements((prev) => ({
           ...prev,
           [data.id]: { ...prev[data.id], lockedBy: data.lockedBy },
         }));
-        return;
       }
       if (data.type === "rect:update") {
         setElements((prev) => ({
           ...prev,
           [data.id]: { ...prev[data.id], x: data.x, y: data.y },
         }));
-        return;
       }
       if (data.type === "rect:released") {
         setElements((prev) => ({
           ...prev,
           [data.id]: { ...prev[data.id], lockedBy: null },
         }));
-        return;
       }
-    },
-    []
-  );
+    };
+    socket.addEventListener("message", handler);
+    return () => socket.removeEventListener("message", handler);
+  }, [socket]);
 
   const onPointerDown = useCallback(
     (e: React.PointerEvent, element: CanvasElement) => {
@@ -76,6 +75,7 @@ export function useCanvasElements(
       isDraggingId.current = element.id; // 👈 set dragging id
 
       onCursorMove?.(element.x, element.y);
+      console.log("onCursorMove called with", element.x, element.y);
 
       setElements((prev) => ({
         ...prev,
@@ -135,5 +135,5 @@ export function useCanvasElements(
     [socket]
   );
 
-  return { elements, handleMessage, onPointerDown, onPointerMove, onPointerUp };
+  return { elements, onPointerDown, onPointerMove, onPointerUp };
 }
