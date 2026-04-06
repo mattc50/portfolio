@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import type PartySocket from "partysocket";
 import type { Transform } from "./useCanvasTransform"; // 👈 import Transform
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "@/lib/canvasConstants";
