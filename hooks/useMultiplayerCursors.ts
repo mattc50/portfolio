@@ -17,7 +17,6 @@ const THROTTLE_MS = 8;
 
 export function useMultiplayerCursors(
   socket: PartySocket | null,
-  onMessage?: (data: Record<string, any>) => void,
   containerRef?: React.RefObject<HTMLDivElement>,
   transformRef?: React.RefObject<{ x: number; y: number; scale: number }> // 👈 add
 ) {
@@ -51,6 +50,7 @@ export function useMultiplayerCursors(
           )
         );
       } else if (data.type === "move") {
+        console.log("cursor move received", data);
         setCursors((prev) => ({
           ...prev,
           [data.id]: {
@@ -66,14 +66,11 @@ export function useMultiplayerCursors(
           return next;
         });
       }
-
-      // Forward all messages to the parent handler (for elements etc.)
-      onMessage?.(data);
     };
 
     socket.addEventListener("message", handleMessage);
     return () => socket.removeEventListener("message", handleMessage);
-  }, [socket, onMessage]);
+  }, [socket]);
 
   // ── RAF lerp loop ─────────────────────────────────────────────────────────
   useEffect(() => {
@@ -209,5 +206,18 @@ export function useMultiplayerCursors(
     };
   }, [socket, sendLeave]);
 
-  return cursors;
+  const sendCursorPosition = useCallback((x: number, y: number) => {
+    socket?.send(
+      JSON.stringify({
+        type: "move",
+        x,
+        y,
+        color: identity.current.color,
+        name: identity.current.name,
+        id: identity.current.id,
+      })
+    );
+  }, [socket]);
+
+  return { cursors, sendCursorPosition }; // 👈 export it
 }
