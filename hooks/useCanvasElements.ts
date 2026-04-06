@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef } from "react";
 import type PartySocket from "partysocket";
+import type { Transform } from "./useCanvasTransform"; // 👈 import Transform
 
 export interface CanvasElement {
   id: string;
@@ -14,22 +15,20 @@ export interface CanvasElement {
 export function useCanvasElements(
   socket: PartySocket | null,
   myId: string,
-  containerRef?: React.RefObject<HTMLDivElement>
+  containerRef?: React.RefObject<HTMLDivElement>,
+  transformRef?: React.RefObject<Transform>
 ) {
   const [elements, setElements] = useState<Record<string, CanvasElement>>({});
   const dragOffset = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const throttleTimer = useRef<ReturnType<typeof setTimeout>>();
+  const isDraggingId = useRef<string | null>(null); // 👈 track which element we're dragging
 
-  // Called by MultiplayerCanvas when a message comes in
   const handleMessage = useCallback(
     (data: Record<string, any>) => {
-      // console.log("handleMessage received", data);
-
       if (data.type === "init") {
         setElements(data.elements ?? {});
         return;
       }
-
       if (data.type === "rect:locked") {
         setElements((prev) => ({
           ...prev,
@@ -37,7 +36,6 @@ export function useCanvasElements(
         }));
         return;
       }
-
       if (data.type === "rect:update") {
         setElements((prev) => ({
           ...prev,
@@ -45,7 +43,6 @@ export function useCanvasElements(
         }));
         return;
       }
-
       if (data.type === "rect:released") {
         setElements((prev) => ({
           ...prev,
@@ -60,63 +57,47 @@ export function useCanvasElements(
   const onPointerDown = useCallback(
     (e: React.PointerEvent, element: CanvasElement) => {
       if (element.lockedBy && element.lockedBy !== myId) return;
-      e.currentTarget.setPointerCapture(e.pointerId);
+      e.stopPropagation();
+
+      const scale = transformRef?.current?.scale ?? 1;
+      const tx = transformRef?.current?.x ?? 0;
+      const ty = transformRef?.current?.y ?? 0;
+      const rect = containerRef?.current?.getBoundingClientRect();
+      const originX = rect ? e.clientX - rect.left : e.clientX;
+      const originY = rect ? e.clientY - rect.top : e.clientY;
 
       dragOffset.current = {
-        x: e.clientX - element.x,
-        y: e.clientY - element.y,
+        x: (originX - tx) / scale - element.x,
+        y: (originY - ty) / scale - element.y,
       };
 
-      // Optimistically lock locally
+      isDraggingId.current = element.id; // 👈 set dragging id
+
       setElements((prev) => ({
         ...prev,
         [element.id]: { ...prev[element.id], lockedBy: myId },
       }));
-
-      socket?.send(
-        JSON.stringify({ type: "rect:drag-start", id: element.id })
-      );
+      socket?.send(JSON.stringify({ type: "rect:drag-start", id: element.id }));
     },
-    [socket, myId]
+    [socket, myId, containerRef, transformRef]
   );
-
-  // const onPointerMove = useCallback(
-  //   (e: React.PointerEvent, element: CanvasElement) => {
-  //     if (element.lockedBy !== myId) return;
-
-  //     const x = e.clientX - dragOffset.current.x;
-  //     const y = e.clientY - dragOffset.current.y;
-
-  //     // Optimistic local update
-  //     setElements((prev) => ({
-  //       ...prev,
-  //       [element.id]: { ...prev[element.id], x, y },
-  //     }));
-
-  //     // Throttled broadcast
-  //     clearTimeout(throttleTimer.current);
-  //     throttleTimer.current = setTimeout(() => {
-  //       socket?.send(
-  //         JSON.stringify({ type: "rect:move", id: element.id, x, y })
-  //       );
-  //     }, 16);
-  //   },
-  //   [socket, myId]
-  // );
 
   const onPointerMove = useCallback(
     (e: React.PointerEvent, element: CanvasElement) => {
-      // const x = e.clientX - dragOffset.current.x;
-      // const y = e.clientY - dragOffset.current.y;
-      let x = e.clientX - dragOffset.current.x;
-      let y = e.clientY - dragOffset.current.y;
+      if (isDraggingId.current !== element.id) return; // 👈 check ref, not lockedBy
 
-      // Clamp to canvas bounds
-      if (containerRef?.current) {
-        const { width, height } = containerRef.current.getBoundingClientRect();
-        x = Math.max(0, Math.min(x, width - element.width));
-        y = Math.max(0, Math.min(y, height - element.height));
-      }
+      const scale = transformRef?.current?.scale ?? 1;
+      const tx = transformRef?.current?.x ?? 0;
+      const ty = transformRef?.current?.y ?? 0;
+      const rect = containerRef?.current?.getBoundingClientRect();
+      const originX = rect ? e.clientX - rect.left : e.clientX;
+      const originY = rect ? e.clientY - rect.top : e.clientY;
+
+      let x = (originX - tx) / scale - dragOffset.current.x;
+      let y = (originY - ty) / scale - dragOffset.current.y;
+
+      x = Math.max(0, x);
+      y = Math.max(0, y);
 
       setElements((prev) => ({
         ...prev,
@@ -125,65 +106,19 @@ export function useCanvasElements(
 
       clearTimeout(throttleTimer.current);
       throttleTimer.current = setTimeout(() => {
-        socket?.send(
-          JSON.stringify({ type: "rect:move", id: element.id, x, y })
-        );
+        socket?.send(JSON.stringify({ type: "rect:move", id: element.id, x, y }));
       }, 16);
     },
-    [socket]
+    [socket, containerRef, transformRef]
   );
-
-  // const onPointerUp = useCallback(
-  //   (e: React.PointerEvent, element: CanvasElement) => {
-  //     if (element.lockedBy !== myId) return;
-  //     socket?.send(
-  //       JSON.stringify({ type: "rect:drag-end", id: element.id })
-  //     );
-  //   },
-  //   [socket, myId]
-  // );
 
   const onPointerUp = useCallback(
     (e: React.PointerEvent, element: CanvasElement) => {
-      socket?.send(
-        JSON.stringify({ type: "rect:drag-end", id: element.id })
-      );
+      isDraggingId.current = null; // 👈 clear on release
+      socket?.send(JSON.stringify({ type: "rect:drag-end", id: element.id }));
     },
     [socket]
   );
 
-  // const resetElement = useCallback(
-  //   (id: string, x: number, y: number) => {
-  //     setElements((prev) => ({
-  //       ...prev,
-  //       [id]: { ...prev[id], x, y },
-  //     }));
-  //     socket?.send(JSON.stringify({ type: "rect:reset", id, x, y }));
-  //   },
-  //   [socket]
-  // );
-
-  const resetElement = useCallback(
-    (id: string, x: number, y: number) => {
-      const el = elements[id]; // need elements in scope — add to deps
-      let clampedX = x;
-      let clampedY = y;
-
-      if (containerRef?.current && el) {
-        const { width, height } = containerRef.current.getBoundingClientRect();
-        clampedX = Math.max(0, Math.min(x, width - el.width));
-        clampedY = Math.max(0, Math.min(y, height - el.height));
-      }
-
-      setElements((prev) => ({
-        ...prev,
-        [id]: { ...prev[id], x: clampedX, y: clampedY },
-      }));
-
-      socket?.send(JSON.stringify({ type: "rect:reset", id, x: clampedX, y: clampedY }));
-    },
-    [socket, containerRef, elements]
-  );
-
-  return { elements, handleMessage, onPointerDown, onPointerMove, onPointerUp, resetElement };
+  return { elements, handleMessage, onPointerDown, onPointerMove, onPointerUp };
 }

@@ -2,11 +2,12 @@ import type { RemoteCursor } from "@/hooks/useMultiplayerCursors";
 
 interface Props {
   cursors: Record<string, RemoteCursor>;
+  transform: { x: number; y: number; scale: number };
 }
 
-export function CursorOverlay({ cursors = {} }: Props) {
-  const entries = Object.values(cursors);
-  if (entries.length === 0) return null;
+export function CursorOverlay({ cursors = {}, transform }: Props) {
+  // const entries = Object.values(cursors);
+  // if (entries.length === 0) return null;
 
   return (
     <div
@@ -19,13 +20,17 @@ export function CursorOverlay({ cursors = {} }: Props) {
         overflow: "hidden",
       }}
     >
-      {entries.map((cursor) => (
+      {Object.values(cursors).map((cursor) => (
         <div
           key={cursor.id}
           style={{
             position: "absolute",
-            left: `${cursor.displayX * 100}%`,
-            top: `${cursor.displayY * 100}%`,
+            // left: `${cursor.displayX * 100}%`,
+            // top: `${cursor.displayY * 100}%`,
+            // left: cursor.displayX,
+            // top: cursor.displayY,
+            left: cursor.displayX * transform.scale + transform.x,
+            top: cursor.displayY * transform.scale + transform.y,
             willChange: "left, top",
           }}
         >

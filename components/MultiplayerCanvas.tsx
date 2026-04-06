@@ -5,119 +5,95 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { getOrCreateIdentity } from "@/lib/identity";
 import { useMultiplayerCursors } from "@/hooks/useMultiplayerCursors";
 import { useCanvasElements } from "@/hooks/useCanvasElements";
+import { useCanvasTransform } from "@/hooks/useCanvasTransform";
 import { CursorOverlay } from "@/components/CursorOverlay";
 import { DraggableRect } from "@/components/DraggableRect";
 
 export function MultiplayerCanvas() {
   const [room, setRoom] = useState("root");
-  // const [room] = useState(() =>
-  //   typeof window !== "undefined"
-  //     ? window.location.pathname.replace(/\/$/, "").replace(/^\//, "") || "root"
-  //     : "root"
-  // );
   const identity = useRef(getOrCreateIdentity());
+  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const [spaceHeld, setSpaceHeld] = useState(false);
 
-  // const socket = usePartySocket({
-  //   host: process.env.NEXT_PUBLIC_PARTYKIT_HOST!,
-  //   room:
-  //     typeof window !== "undefined"
-  //       ? window.location.pathname.replace(/\/$/, "") || "root"
-  //       : "root",
-  // });
-
-  // const socket = usePartySocket({
-  //   host: process.env.NEXT_PUBLIC_PARTYKIT_HOST!,
-  //   room,
-  // });
-
-  // const { elements, handleMessage, onPointerDown, onPointerMove, onPointerUp } =
-  //   useCanvasElements(null, identity.current.id);
-
-  // const cursors = useMultiplayerCursors(null, handleMessage);
+  const canvasTransform = useCanvasTransform(containerRef);
 
   const socket = usePartySocket({
     host: process.env.NEXT_PUBLIC_PARTYKIT_HOST!,
     room,
     onMessage(event) {
       const data = JSON.parse(event.data);
-      // console.log("message received", data);
       handleMessage(data);
     },
   });
 
-  const [scrollPos, setScrollPos] = useState({ left: 0, top: 0 });
+  const { elements, handleMessage, onPointerDown, onPointerMove, onPointerUp } =
+    useCanvasElements(socket, identity.current.id, containerRef, canvasTransform.transformRef);
 
-  const canvasRef = useRef<HTMLDivElement>(null);
+  const cursors = useMultiplayerCursors(socket, handleMessage, containerRef, canvasTransform.transformRef);
 
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  const { elements, handleMessage, onPointerDown, onPointerMove, onPointerUp, resetElement } =
-    // useCanvasElements(null, identity.current.id);
-    useCanvasElements(socket, identity.current.id, canvasRef);
-
-  // const cursors = useMultiplayerCursors(socket, handleMessage);
-  const cursors = useMultiplayerCursors(socket, handleMessage, canvasRef);
-
-  const handleReset = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const { height } = canvas.getBoundingClientRect();
-    const el = elements["rect-1"];
-    if (!el) return;
-    resetElement("rect-1", 20, height - el.height - 20);
-  };
-
-  const handleBringIntoView = () => {
-    const el = elements["rect-1"];
-    if (!el || !scrollContainerRef.current) return;
-
-    scrollContainerRef.current.scrollTo({
-      left: el.x,
-      top: el.y,
-      behavior: "smooth",
-    });
-  };
-
-  const isOutOfView = useMemo(() => {
-    const el = elements["rect-1"];
-    const container = scrollContainerRef.current;
-    if (!el || !container) return false;
-
-    const { clientWidth, clientHeight } = container;
-
-    const rectRight = el.x + el.width;
-    const rectBottom = el.y + el.height;
-
-    const visibleLeft = scrollPos.left;
-    const visibleTop = scrollPos.top;
-    const visibleRight = scrollPos.left + clientWidth;
-    const visibleBottom = scrollPos.top + clientHeight;
-
-    return (
-      rectRight < visibleLeft ||
-      el.x > visibleRight ||
-      rectBottom < visibleTop ||
-      el.y > visibleBottom
-    );
-  }, [elements, scrollPos]);
-
+  // Space bar pan mode
   useEffect(() => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      setScrollPos({ left: container.scrollLeft, top: container.scrollTop });
+    const down = (e: KeyboardEvent) => {
+      if (e.code === "Space" && e.target === document.body) {
+        e.preventDefault(); // prevent page scroll
+        setSpaceHeld(true);
+      }
     };
-
-    container.addEventListener("scroll", handleScroll);
-    return () => container.removeEventListener("scroll", handleScroll);
+    const up = (e: KeyboardEvent) => e.code === "Space" && setSpaceHeld(false);
+    window.addEventListener("keydown", down);
+    window.addEventListener("keyup", up);
+    return () => {
+      window.removeEventListener("keydown", down);
+      window.removeEventListener("keyup", up);
+    };
   }, []);
 
+  // Sync room to URL
   useEffect(() => {
     setRoom(
       window.location.pathname.replace(/\/$/, "").replace(/^\//, "") || "root"
     );
   }, []);
+
+  // isOutOfView: check if rect-1 is outside the visible canvas area accounting for transform
+  const isOutOfView = useMemo(() => {
+    const el = elements["rect-1"];
+    const container = containerRef.current;
+    if (!el || !container) return false;
+
+    const { x, y, scale } = canvasTransform.transform;
+    const { clientWidth, clientHeight } = container;
+
+    // Convert element bounds to screen-space
+    const screenLeft = el.x * scale + x;
+    const screenTop = el.y * scale + y;
+    const screenRight = (el.x + el.width) * scale + x;
+    const screenBottom = (el.y + el.height) * scale + y;
+
+    return (
+      screenRight < 0 ||
+      screenLeft > clientWidth ||
+      screenBottom < 0 ||
+      screenTop > clientHeight
+    );
+  }, [elements, canvasTransform.transform]);
+
+  const handleBringIntoView = () => {
+    const el = elements["rect-1"];
+    const container = containerRef.current;
+    if (!el || !container) return;
+
+    const { clientWidth, clientHeight } = container;
+    const { scale } = canvasTransform.transform;
+
+    // Center the element in the viewport
+    canvasTransform.setTransform({
+      scale,
+      x: clientWidth / 2 - (el.x + el.width / 2) * scale,
+      y: clientHeight / 2 - (el.y + el.height / 2) * scale,
+    });
+  };
 
   return (
     <div style={{ position: "relative", backgroundColor: "var(--canvas)" }}>
@@ -142,45 +118,43 @@ export function MultiplayerCanvas() {
           Bring into view
         </button>
       )}
+
       <div
-        ref={scrollContainerRef}
+        ref={containerRef}
         style={{
-          overflow: "scroll",
+          overflow: "hidden",
           aspectRatio: "16 / 10",
           position: "relative",
+          backgroundColor: "var(--canvas)",
+          cursor: spaceHeld ? "grab" : "default",
         }}
+        // onWheel={(e) => {
+        //   const rect = containerRef.current?.getBoundingClientRect();
+        //   if (rect) canvasTransform.onWheel(e, rect);
+        // }}
+        onPointerDown={(e) => {
+          if (spaceHeld || e.button === 1) {
+            (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+            canvasTransform.onPointerDown(e);
+          }
+        }}
+        onPointerMove={(e) => {
+          canvasTransform.onPointerMove(e);
+        }}
+        onPointerUp={canvasTransform.onPointerUp}
       >
         <div
           ref={canvasRef}
           style={{
             backgroundColor: "var(--canvas)",
-            position: "relative",
-            width: "500px",
-            height: "500px",
-            overflow: "visible",
-            margin: "8px",
-          }}
-        >
-          {/* <button
-          onClick={handleReset}
-          style={{
             position: "absolute",
-            bottom: 16,
-            right: 16,
-            zIndex: 100,
-            padding: "6px 12px",
-            fontSize: 12,
-            fontWeight: 500,
-            background: "rgba(255,255,255,0.1)",
-            color: "white",
-            border: "1px solid rgba(255,255,255,0.2)",
-            borderRadius: 6,
-            cursor: "pointer",
+            width: 500,
+            height: 500,
+            transform: `translate(${canvasTransform.transform.x}px, ${canvasTransform.transform.y}px) scale(${canvasTransform.transform.scale})`,
+            transformOrigin: "0 0",
           }}
         >
-          Reset position
-        </button> */}
-          {/* Canvas layer — elements live here */}
+          {/* Elements layer */}
           <div style={{ position: "absolute", inset: 0 }}>
             {Object.values(elements).map((el) =>
               el.type === "rect" ? (
@@ -197,9 +171,11 @@ export function MultiplayerCanvas() {
             )}
           </div>
 
-          {/* Cursor overlay sits above everything */}
-          <CursorOverlay cursors={cursors} />
+          {/* Cursor overlay */}
+          {/* <CursorOverlay cursors={cursors} /> */}
         </div>
+        {/* Cursor overlay */}
+        <CursorOverlay cursors={cursors} transform={canvasTransform.transform} />
       </div>
     </div>
   );
