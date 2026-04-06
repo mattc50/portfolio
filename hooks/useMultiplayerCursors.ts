@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from "react";
-import usePartySocket from "partysocket/react";
+import type PartySocket from "partysocket";
 import { getOrCreateIdentity } from "@/lib/identity";
 
 export interface RemoteCursor {
@@ -12,12 +12,14 @@ export interface RemoteCursor {
   name: string;
 }
 
-// const LERP_FACTOR = 0.18;
 const LERP_FACTOR = 0.25;
-// const THROTTLE_MS = 33;
 const THROTTLE_MS = 8;
 
-export function useMultiplayerCursors() {
+export function useMultiplayerCursors(
+  socket: PartySocket | null,
+  onMessage?: (data: Record<string, any>) => void,
+  containerRef?: React.RefObject<HTMLDivElement>
+) {
   const [cursors, setCursors] = useState<Record<string, RemoteCursor>>({});
   const identity = useRef(getOrCreateIdentity());
   const throttleTimer = useRef<ReturnType<typeof setTimeout>>();
@@ -30,27 +32,24 @@ export function useMultiplayerCursors() {
       navigator.maxTouchPoints > 0;
   }, []);
 
-  const socket = usePartySocket({
-    host: process.env.NEXT_PUBLIC_PARTYKIT_HOST!,
-    room: typeof window !== "undefined"
-      ? window.location.pathname.replace(/\/$/, "") || "root"
-      : "root",
-    onMessage(event) {
+  // ── Message handling ──────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleMessage = (event: MessageEvent) => {
       const data = JSON.parse(event.data);
 
+      // Cursor-specific messages handled here
       if (data.type === "init") {
         setCursors(
           Object.fromEntries(
-            Object.entries(data.cursors).map(([id, c]: [string, any]) => [
+            Object.entries(data.cursors ?? {}).map(([id, c]: [string, any]) => [
               id,
               { ...c, displayX: c.x, displayY: c.y },
             ])
           )
         );
-        return;
-      }
-
-      if (data.type === "move") {
+      } else if (data.type === "move") {
         setCursors((prev) => ({
           ...prev,
           [data.id]: {
@@ -59,20 +58,23 @@ export function useMultiplayerCursors() {
             displayY: prev[data.id]?.displayY ?? data.y,
           },
         }));
-        return;
-      }
-
-      if (data.type === "leave") {
+      } else if (data.type === "leave") {
         setCursors((prev) => {
           const next = { ...prev };
           delete next[data.id];
           return next;
         });
       }
-    },
-  });
 
-  // RAF lerp loop
+      // Forward all messages to the parent handler (for elements etc.)
+      onMessage?.(data);
+    };
+
+    socket.addEventListener("message", handleMessage);
+    return () => socket.removeEventListener("message", handleMessage);
+  }, [socket, onMessage]);
+
+  // ── RAF lerp loop ─────────────────────────────────────────────────────────
   useEffect(() => {
     function tick() {
       setCursors((prev) => {
@@ -109,36 +111,74 @@ export function useMultiplayerCursors() {
     };
   }, []);
 
+  // ── Mouse tracking ────────────────────────────────────────────────────────
   const sendLeave = useCallback(() => {
-    socket.send(JSON.stringify({ type: "leave" }));
+    socket?.send(JSON.stringify({ type: "leave" }));
   }, [socket]);
 
   useEffect(() => {
-    if (isTouchOnly.current) return;
+    if (isTouchOnly.current || !socket) return;
+
+    // const handleMouseMove = (e: MouseEvent) => {
+    //   clearTimeout(throttleTimer.current);
+    //   throttleTimer.current = setTimeout(() => {
+    //     socket.send(
+    //       JSON.stringify({
+    //         type: "move",
+    //         x: e.clientX / window.innerWidth,
+    //         y: e.clientY / window.innerHeight,
+    //         color: identity.current.color,
+    //         name: identity.current.name,
+    //         id: identity.current.id,
+    //       })
+    //     );
+    //   }, THROTTLE_MS);
+    // };
 
     const handleMouseMove = (e: MouseEvent) => {
       clearTimeout(throttleTimer.current);
       throttleTimer.current = setTimeout(() => {
-        socket.send(JSON.stringify({
-          type: "move",
-          x: e.clientX / window.innerWidth,
-          y: e.clientY / window.innerHeight,
-          color: identity.current.color,
-          name: identity.current.name,
-          id: identity.current.id,
-        }));
+        const container = containerRef?.current;
+        let x: number;
+        let y: number;
+
+        if (container) {
+          const rect = container.getBoundingClientRect();
+          x = (e.clientX - rect.left) / rect.width;
+          y = (e.clientY - rect.top) / rect.height;
+        } else {
+          x = e.clientX / window.innerWidth;
+          y = e.clientY / window.innerHeight;
+        }
+
+        socket?.send(
+          JSON.stringify({
+            type: "move",
+            x,
+            y,
+            color: identity.current.color,
+            name: identity.current.name,
+            id: identity.current.id,
+          })
+        );
       }, THROTTLE_MS);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) sendLeave();
     };
 
     const handleBeforeUnload = () => sendLeave();
 
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("beforeunload", handleBeforeUnload);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       clearTimeout(throttleTimer.current);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("beforeunload", handleBeforeUnload);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
       sendLeave();
     };
   }, [socket, sendLeave]);

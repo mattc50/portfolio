@@ -3,6 +3,7 @@
 // Add items here — the grid and lightbox update automatically.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { MultiplayerCanvas } from "@/components/MultiplayerCanvas";
 import { ReactNode } from "react";
 
 export interface SandboxItem {
@@ -13,11 +14,12 @@ export interface SandboxItem {
   /** Short label shown below the title on the tile (e.g. tool, context) */
   label?: string;
   /** Path to .webm under /public, e.g. "/sandbox/drag-reorder.webm" */
-  media: string;
+  media?: string;
   mediaMp4?: string;
   mediaType: "video" | "image";
   mimeType?: "video/mp4" | "video/webm" | "video/quicktime";
   mode?: "light" | "dark";
+  element?: ReactNode;
   /**
    * Optional poster image shown before the video loads.
    * Path under /public, e.g. "/sandbox/drag-reorder.jpg"
@@ -232,6 +234,19 @@ export const sandboxItems: SandboxItem[] = [
         <p>I was inspired to embark on this project from a friend, who had taken up the hobby of painting the famous Andy Warhol Campbell Soup Can onto skateboards for her friends. I wanted to create a resource where people could visualize the skateboard they wanted her to paint, and then send her the exact colors they wanted.</p>
         <b>How it works</b>
         <p>I thought of each color of the Campbell Skateboard as being a "layer", with each layer having its own color. With this model in mind, I created SVGs for each layer which would then be stacked on top of each other, providing the framework for customizability by the user on a website.</p>
+      </>
+    ),
+    published: true,
+  },
+  {
+    id: "multiplayer",
+    title: "Multiplayer",
+    label: "React · View with friends across devices!",
+    element: <MultiplayerCanvas />,
+    mediaType: "image",
+    description: (
+      <>
+        <p>Drag with friends!</p>
       </>
     ),
     published: true,

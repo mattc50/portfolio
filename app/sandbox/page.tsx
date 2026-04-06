@@ -3,6 +3,7 @@ import { getPublishedSandboxItems } from "@/lib/sandbox";
 import { SandboxGrid } from "@/components/SandboxGrid";
 import styles from "./sandbox.module.css";
 import { Footer } from "@/components/Footer";
+import { MultiplayerCanvas } from "@/components/MultiplayerCanvas";
 
 export const metadata: Metadata = {
   title: "Sandbox",
@@ -30,6 +31,11 @@ export default function SandboxPage() {
 
         <SandboxGrid items={items} />
       </section>
+      {/* <section>
+        <div style={{ width: "100vw", height: "100vh" }}>
+          <MultiplayerCanvas />
+        </div>
+      </section> */}
       <Footer />
     </>
   );
