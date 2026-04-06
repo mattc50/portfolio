@@ -167,6 +167,7 @@ export function useCanvasTransform(containerRef: React.RefObject<HTMLElement>) {
     let lastTouchDist = 0;
     let lastMidpoint = { x: 0, y: 0 };
     let lastSingleTouch = { x: 0, y: 0 };
+    let isPanning = false; // 👈 add alongside other let variables
 
     const getTouchDist = (a: Touch, b: Touch) =>
       Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY);
@@ -178,7 +179,12 @@ export function useCanvasTransform(containerRef: React.RefObject<HTMLElement>) {
 
     const handleTouchStart = (e: TouchEvent) => {
       // Don't pan if the touch started on a draggable element
-      if ((e.target as HTMLElement).closest('[data-draggable]')) return;
+      if ((e.target as HTMLElement).closest('[data-draggable]')) {
+        isPanning = false; // 👈 touch started on rect, don't pan
+        return;
+      }
+
+      isPanning = true; // 👈 touch started on canvas, pan
 
       if (e.touches.length === 2) {
         lastTouchDist = getTouchDist(e.touches[0], e.touches[1]);
@@ -190,6 +196,7 @@ export function useCanvasTransform(containerRef: React.RefObject<HTMLElement>) {
     };
 
     const handleTouchMove = (e: TouchEvent) => {
+      if (!isPanning && e.touches.length !== 2) return; // 👈 block single-finger pan if on rect
       e.preventDefault(); // 👈 moved up, applies to both cases
 
       const rect = el.getBoundingClientRect();
@@ -210,6 +217,7 @@ export function useCanvasTransform(containerRef: React.RefObject<HTMLElement>) {
           return clampTransform(zoomedX + dx, zoomedY + dy, newScale, rect.width, rect.height);
         });
       } else if (e.touches.length === 1) {
+        if (!isPanning) return; // 👈 extra guard
         const touch = e.touches[0];
         const dx = touch.clientX - lastSingleTouch.x;
         const dy = touch.clientY - lastSingleTouch.y;
