@@ -9,7 +9,11 @@ import { useCanvasTransform } from "@/hooks/useCanvasTransform";
 import { CursorOverlay } from "@/components/CursorOverlay";
 import { DraggableRect } from "@/components/DraggableRect";
 
-export function MultiplayerCanvas() {
+interface Props {
+  onRectClick?: () => void;
+}
+
+export function MultiplayerCanvas({ onRectClick }: Props) {
   const [room, setRoom] = useState("root");
   const identity = useRef(getOrCreateIdentity());
   const containerRef = useRef<HTMLDivElement>(null);
@@ -148,6 +152,8 @@ export function MultiplayerCanvas() {
           style={{
             backgroundColor: "var(--canvas)",
             position: "absolute",
+            backgroundImage: "radial-gradient(circle, rgba(0, 0, 0, 0.1) 1px, transparent 1px)",
+            backgroundSize: "24px 24px",
             width: 500,
             height: 500,
             transform: `translate(${canvasTransform.transform.x}px, ${canvasTransform.transform.y}px) scale(${canvasTransform.transform.scale})`,
@@ -166,6 +172,7 @@ export function MultiplayerCanvas() {
                   onPointerDown={onPointerDown}
                   onPointerMove={onPointerMove}
                   onPointerUp={onPointerUp}
+                  onRectClick={onRectClick}
                 />
               ) : null
             )}

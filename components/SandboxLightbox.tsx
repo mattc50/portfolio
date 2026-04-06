@@ -118,50 +118,52 @@ export function SandboxLightbox({ item, originRect, onClose }: SandboxLightboxPr
         onClick={(e) => e.stopPropagation()}
       >
         {/* Video */}
-        <div className={styles.videoWrap}>
-          <button
-            className={`${styles.closeBtn}${item.mode === "dark" ? ` ${styles.lightBtn}` : ""}`}
-            onClick={handleClose}
-            aria-label="Close"
-          >
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path
-                d="M2 2L14 14M14 2L2 14"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-            </svg>
-          </button>
-          {/* {item.element && item.element} */}
-          {item.mediaType === "video" ? (
-            <video
-              ref={videoRef}
-              src={item.media}
-              poster={item.poster}
-              muted
-              loop
-              playsInline
-              autoPlay
-              className={styles.video}
+        {item.media && (
+          <div className={styles.videoWrap}>
+            <button
+              className={`${styles.closeBtn}${item.mode === "dark" ? ` ${styles.lightBtn}` : ""}`}
+              onClick={handleClose}
+              aria-label="Close"
             >
-              <source src={item.media} type={item.mimeType ?? "video/mp4"} />
-            </video>
-          ) : (
-            <img
-              src={item.media}
-              alt={item.title}
-              className={styles.video}
-            />
-          )}
-        </div>
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path
+                  d="M2 2L14 14M14 2L2 14"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
+            {/* {item.element && item.element} */}
+            {item.mediaType === "video" ? (
+              <video
+                ref={videoRef}
+                src={item.media}
+                poster={item.poster}
+                muted
+                loop
+                playsInline
+                autoPlay
+                className={styles.video}
+              >
+                <source src={item.media} type={item.mimeType ?? "video/mp4"} />
+              </video>
+            ) : (
+              <img
+                src={item.media}
+                alt={item.title}
+                className={styles.video}
+              />
+            )}
+          </div>
+        )}
 
         {/* Content */}
         <div className={styles.content}>
           <div className={styles.contentHeader}>
             <div>
-              <h2 className={styles.title}>{item.title}</h2>
-              {item.label && <span className={styles.label}>{item.label}</span>}
+              <h2 className={styles.title}>{item.id === "multiplayer" ? "Sign the guestbook!" : item.title}</h2>
+              {item.label && item.id !== "multiplayer" && <span className={styles.label}>{item.label}</span>}
             </div>
             {/* <button
               className={styles.closeBtn}

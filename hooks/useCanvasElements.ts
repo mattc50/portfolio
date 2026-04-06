@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import type PartySocket from "partysocket";
 import type { Transform } from "./useCanvasTransform"; // 👈 import Transform
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from "@/lib/canvasConstants";
 
 export interface CanvasElement {
   id: string;
@@ -93,11 +94,20 @@ export function useCanvasElements(
       const originX = rect ? e.clientX - rect.left : e.clientX;
       const originY = rect ? e.clientY - rect.top : e.clientY;
 
-      let x = (originX - tx) / scale - dragOffset.current.x;
-      let y = (originY - ty) / scale - dragOffset.current.y;
+      // let x = (originX - tx) / scale - dragOffset.current.x;
+      // let y = (originY - ty) / scale - dragOffset.current.y;
 
-      x = Math.max(0, x);
-      y = Math.max(0, y);
+      // x = Math.max(0, x);
+      // y = Math.max(0, y);
+
+      const x = Math.min(
+        CANVAS_WIDTH - element.width,   // 👈 can't go past right edge
+        Math.max(0, (originX - tx) / scale - dragOffset.current.x)
+      );
+      const y = Math.min(
+        CANVAS_HEIGHT - element.height, // 👈 can't go past bottom edge
+        Math.max(0, (originY - ty) / scale - dragOffset.current.y)
+      );
 
       setElements((prev) => ({
         ...prev,

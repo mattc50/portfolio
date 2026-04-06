@@ -1,4 +1,5 @@
 // useCanvasTransform.ts
+import { CANVAS_HEIGHT, CANVAS_WIDTH } from "@/lib/canvasConstants";
 import { useState, useCallback, useRef, useEffect } from "react";
 
 export interface Transform {
@@ -24,6 +25,19 @@ function usePreventBrowserZoom(containerRef: React.RefObject<HTMLElement>) {
     el.addEventListener("wheel", handler, { passive: false });
     return () => el.removeEventListener("wheel", handler);
   }, [containerRef]);
+}
+
+function clampTransform(x: number, y: number, scale: number, containerWidth: number, containerHeight: number) {
+  // The canvas in screen-space spans from (x, y) to (x + CANVAS_WIDTH * scale, y + CANVAS_HEIGHT * scale)
+  // We want to prevent panning so the canvas always fills the container
+  const minX = containerWidth - CANVAS_WIDTH * scale;
+  const minY = containerHeight - CANVAS_HEIGHT * scale;
+
+  return {
+    x: Math.min(0, Math.max(x, minX)),
+    y: Math.min(0, Math.max(y, minY)),
+    scale,
+  };
 }
 
 export function useCanvasTransform(containerRef: React.RefObject<HTMLElement>) {
@@ -87,11 +101,20 @@ export function useCanvasTransform(containerRef: React.RefObject<HTMLElement>) {
 
   const onPointerMove = useCallback((e: React.PointerEvent) => {
     if (!isPanning.current) return;
-    setTransform((prev) => ({
-      ...prev,
-      x: e.clientX - panStart.current.x,
-      y: e.clientY - panStart.current.y,
-    }));
+    // setTransform((prev) => ({
+    //   ...prev,
+    //   x: e.clientX - panStart.current.x,
+    //   y: e.clientY - panStart.current.y,
+    // }));
+
+    const container = containerRef.current;
+    if (!container) return;
+    const { width, height } = container.getBoundingClientRect();
+    setTransform((prev) => {
+      const x = e.clientX - panStart.current.x;
+      const y = e.clientY - panStart.current.y;
+      return clampTransform(x, y, prev.scale, width, height);
+    });
   }, []);
 
   const onPointerUp = useCallback(() => {
@@ -109,23 +132,35 @@ export function useCanvasTransform(containerRef: React.RefObject<HTMLElement>) {
     const handler = (e: WheelEvent) => {
       e.preventDefault();
       const rect = el.getBoundingClientRect();
+      const { width, height } = rect;
+
       // inline the wheel logic here instead of in JSX
       if (e.ctrlKey || e.metaKey) {
         const delta = -e.deltaY * 0.01;
         const newScale = Math.min(Math.max(transformRef.current.scale * (1 + delta), 0.1), 10);
         const originX = e.clientX - rect.left;
         const originY = e.clientY - rect.top;
-        setTransform((prev) => ({
-          scale: newScale,
-          x: originX - (originX - prev.x) * (newScale / prev.scale),
-          y: originY - (originY - prev.y) * (newScale / prev.scale),
-        }));
+        // setTransform((prev) => ({
+        //   scale: newScale,
+        //   x: originX - (originX - prev.x) * (newScale / prev.scale),
+        //   y: originY - (originY - prev.y) * (newScale / prev.scale),
+        // }));
+        setTransform((prev) => {
+          const x = originX - (originX - prev.x) * (newScale / prev.scale);
+          const y = originY - (originY - prev.y) * (newScale / prev.scale);
+          return clampTransform(x, y, newScale, width, height);
+        });
       } else {
-        setTransform((prev) => ({
-          ...prev,
-          x: prev.x - (e.shiftKey ? e.deltaY : e.deltaX),
-          y: prev.y - (e.shiftKey ? 0 : e.deltaY),
-        }));
+        // setTransform((prev) => ({
+        //   ...prev,
+        //   x: prev.x - (e.shiftKey ? e.deltaY : e.deltaX),
+        //   y: prev.y - (e.shiftKey ? 0 : e.deltaY),
+        // }));
+        setTransform((prev) => {
+          const x = prev.x - (e.shiftKey ? e.deltaY : e.deltaX);
+          const y = prev.y - (e.shiftKey ? 0 : e.deltaY);
+          return clampTransform(x, y, prev.scale, width, height);
+        });
       }
     };
 
