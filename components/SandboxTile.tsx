@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import type { SandboxItem } from "@/lib/sandbox";
 import styles from "./SandboxTile.module.css";
+import { MultiplayerCanvas } from "./MultiplayerCanvas";
 
 interface SandboxTileProps {
   item: SandboxItem;
@@ -59,41 +60,34 @@ export function SandboxTile({ item, index, onClick }: SandboxTileProps) {
       })}
     >
       {/* Video */}
-      {item.media && <div className={styles.videoWrap}>
-        {item.mediaType === "video" ? (
-          <video
-            ref={videoRef}
-            src={item.media}
-            poster={item.poster}
-            muted
-            loop
-            playsInline
-            preload="auto"
-            className={styles.video}
-          >
-            <source src={item.media} type={item.mimeType ?? "video/mp4"} />
-          </video>
-        ) : (
-          <img
-            src={item.media}
-            alt={item.title}
-            className={styles.video}  // same class, same object-fit: cover sizing
-          />
-        )}
-      </div>}
-      {item.element && item.element}
+      {item.media && (
+        <div className={styles.videoWrap}>
+          {item.mediaType === "video" ? (
+            <video
+              ref={videoRef}
+              src={item.media}
+              poster={item.poster}
+              muted
+              loop
+              playsInline
+              preload="auto"
+              className={styles.video}
+            >
+              <source src={item.media} type={item.mimeType ?? "video/mp4"} />
+            </video>
+          ) : (
+            <img
+              src={item.media}
+              alt={item.title}
+              className={styles.video}  // same class, same object-fit: cover sizing
+            />
+          )}
+        </div>
+      )}
+      {item.id === "multiplayer" && <MultiplayerCanvas onRectClick={handleClick} />}
 
       {/* Footer */}
-      <div
-        className={`${styles.footer} ${item.element && styles.clickable}`}
-        {...(item.element && {
-          onClick: handleClick,
-          role: "button",
-          tabIndex: 0,
-          ariaLabel: `View ${item.title}`,
-          onKeyDown: (e) => e.key === "Enter" && handleClick()
-        })}
-      >
+      <div className={`${styles.footer} ${item.element && styles.clickable}`}>
         <span className={styles.title}>{item.title}</span>
         {item.label && <span className={styles.label}>{item.label}</span>}
       </div>

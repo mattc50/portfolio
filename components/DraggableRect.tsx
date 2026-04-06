@@ -9,6 +9,7 @@ interface Props {
   onPointerDown: (e: React.PointerEvent, el: CanvasElement) => void;
   onPointerMove: (e: React.PointerEvent, el: CanvasElement) => void;
   onPointerUp: (e: React.PointerEvent, el: CanvasElement) => void;
+  onRectClick?: () => void;
 }
 
 export function DraggableRect({
@@ -18,6 +19,7 @@ export function DraggableRect({
   onPointerDown,
   onPointerMove,
   onPointerUp,
+  onRectClick,
 }: Props) {
   const isLockedByMe = element.lockedBy === myId;
   const isLockedByOther = element.lockedBy && element.lockedBy !== myId;
@@ -108,6 +110,28 @@ export function DraggableRect({
           {lockingCursor.name}
         </div>
       )}
+      <button
+        onPointerDown={(e) => e.stopPropagation()} // prevent triggering drag
+        onClick={onRectClick}
+        style={{
+          width: "max-content",
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          zIndex: 100,
+          padding: "6px 12px",
+          fontSize: 12,
+          fontWeight: 500,
+          background: "rgba(0, 0, 0, 0.03)",
+          color: "var(--muted)",
+          border: "1px solid var(--border)",
+          borderRadius: 6,
+          cursor: "pointer",
+        }}
+      >
+        Sign the guestbook!
+      </button>
     </div>
   );
 }

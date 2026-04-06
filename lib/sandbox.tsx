@@ -242,7 +242,7 @@ export const sandboxItems: SandboxItem[] = [
     id: "multiplayer",
     title: "Multiplayer",
     label: "React · View with friends across devices!",
-    element: <MultiplayerCanvas />,
+    // element: <MultiplayerCanvas />,
     mediaType: "image",
     description: (
       <>
