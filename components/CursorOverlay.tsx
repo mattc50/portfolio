@@ -1,18 +1,18 @@
-"use client";
+import type { RemoteCursor } from "@/hooks/useMultiplayerCursors";
 
-import { useMultiplayerCursors } from "@/hooks/useMultiplayerCursors";
+interface Props {
+  cursors: Record<string, RemoteCursor>;
+}
 
-export function CursorOverlay() {
-  const cursors = useMultiplayerCursors();
+export function CursorOverlay({ cursors = {} }: Props) {
   const entries = Object.values(cursors);
-
   if (entries.length === 0) return null;
 
   return (
     <div
       aria-hidden="true"
       style={{
-        position: "fixed",
+        position: "absolute",
         inset: 0,
         pointerEvents: "none",
         zIndex: 9999,
@@ -27,8 +27,6 @@ export function CursorOverlay() {
             left: `${cursor.displayX * 100}%`,
             top: `${cursor.displayY * 100}%`,
             willChange: "left, top",
-            zIndex: 9999,
-
           }}
         >
           <svg

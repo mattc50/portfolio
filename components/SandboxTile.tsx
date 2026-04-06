@@ -47,17 +47,19 @@ export function SandboxTile({ item, index, onClick }: SandboxTileProps) {
   return (
     <div
       ref={tileRef}
-      className={`${styles.tile} anim-fade-up ${delayClass}`}
+      className={`${styles.tile} anim-fade-up ${delayClass} ${item.media && styles.clickable}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onClick={handleClick}
-      role="button"
-      tabIndex={0}
-      aria-label={`View ${item.title}`}
-      onKeyDown={(e) => e.key === "Enter" && handleClick()}
+      {...(item.media && {
+        onClick: handleClick,
+        role: "button",
+        tabIndex: 0,
+        ariaLabel: `View ${item.title}`,
+        onKeyDown: (e) => e.key === "Enter" && handleClick()
+      })}
     >
       {/* Video */}
-      <div className={styles.videoWrap}>
+      {item.media && <div className={styles.videoWrap}>
         {item.mediaType === "video" ? (
           <video
             ref={videoRef}
@@ -78,10 +80,20 @@ export function SandboxTile({ item, index, onClick }: SandboxTileProps) {
             className={styles.video}  // same class, same object-fit: cover sizing
           />
         )}
-      </div>
+      </div>}
+      {item.element && item.element}
 
       {/* Footer */}
-      <div className={styles.footer}>
+      <div
+        className={`${styles.footer} ${item.element && styles.clickable}`}
+        {...(item.element && {
+          onClick: handleClick,
+          role: "button",
+          tabIndex: 0,
+          ariaLabel: `View ${item.title}`,
+          onKeyDown: (e) => e.key === "Enter" && handleClick()
+        })}
+      >
         <span className={styles.title}>{item.title}</span>
         {item.label && <span className={styles.label}>{item.label}</span>}
       </div>

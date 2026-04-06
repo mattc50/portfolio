@@ -125,9 +125,10 @@ code {
 }
 
 /* ─── Scrollbar ──────────────────────────────────────────────────────────────── */
-::-webkit-scrollbar        { width: 6px; }
+::-webkit-scrollbar        { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track  { background: var(--canvas); }
 ::-webkit-scrollbar-thumb  { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-corner {background-color: var(--canvas); }
 
 /* ─── Animations ─────────────────────────────────────────────────────────────── */
 @keyframes fade-up {

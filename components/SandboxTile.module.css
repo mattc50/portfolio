@@ -1,11 +1,15 @@
 .tile {
-  cursor: pointer;
+  /* cursor: pointer; */
   border-radius: var(--radius-lg);
   overflow: hidden;
   border: 1px solid var(--border);
   background-color: var(--canvas);
   transition: border-color var(--transition), transform 0.2s ease, box-shadow 0.2s ease;
   outline: none;
+}
+
+.clickable {
+  cursor: pointer;
 }
 
 .tile:hover,

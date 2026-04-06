@@ -1,4 +1,4 @@
 {
   "name": "portfolio",
-  "main": "party/cursor.ts"
+  "main": "party/main.ts"
 }
