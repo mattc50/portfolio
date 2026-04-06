@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react"
 
-export function useApiFetch(url: string, options?: RequestInit) {
-  const [data, setData] = useState(null);
+export function useApiFetch<T = unknown>(url: string, options?: RequestInit, manual = false) {
+  const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [refetchTrigger, setRefetchTrigger] = useState(0);
 
   useEffect(() => {
-    if (refetchTrigger === 0) return; // ← skip the initial mount run
+    if (manual && refetchTrigger === 0) return; // ← skip the initial mount run
 
     const controller = new AbortController();
 

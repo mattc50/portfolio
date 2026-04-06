@@ -9,7 +9,7 @@ function GuestbookForm({ onClose }: { onClose: () => void }) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ name }),
-  });
+  }, true);
 
   useEffect(() => {
     if (data) {

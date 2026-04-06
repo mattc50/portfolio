@@ -1,6 +1,7 @@
 import type { CanvasElement } from "@/hooks/useCanvasElements";
 import type { RemoteCursor } from "@/hooks/useMultiplayerCursors";
 import { useEffect, useRef } from "react";
+import GuestbookCount from "./GuestbookCount";
 
 interface Props {
   element: CanvasElement;
@@ -124,13 +125,14 @@ export function DraggableRect({
           fontSize: 12,
           fontWeight: 500,
           background: "rgba(0, 0, 0, 0.03)",
-          color: "var(--muted)",
+          color: "var(--ink)",
           border: "1px solid var(--border)",
           borderRadius: 6,
           cursor: "pointer",
         }}
       >
-        Sign the guestbook!
+        <p>Sign the guestbook!</p>
+        <GuestbookCount />
       </button>
     </div>
   );
