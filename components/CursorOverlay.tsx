@@ -1,11 +1,11 @@
 import type { RemoteCursor } from "@/hooks/useMultiplayerCursors";
 
 interface Props {
-  cursors: Record<string, RemoteCursor> | {};
-  transform: { x: number; y: number; scale: number } | {};
+  cursors: Record<string, RemoteCursor>;
+  transform: { x: number; y: number; scale: number };
 }
 
-export function CursorOverlay({ cursors = {}, transform }: Props) {
+export function CursorOverlay({ cursors, transform }: Props) {
   // const entries = Object.values(cursors);
   // if (entries.length === 0) return null;
 

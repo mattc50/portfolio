@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Sora, Inter, DM_Sans, DM_Mono } from "next/font/google";
 import "./globals.css";
 import { Nav } from "@/components/Nav";
-import { CursorOverlay } from "@/components/CursorOverlay";
+// import { CursorOverlay } from "@/components/CursorOverlay";
 
 // ─── Fonts ────────────────────────────────────────────────────────────────────
 // Swap these out to change the typographic personality of the site.
@@ -65,7 +65,6 @@ export default function RootLayout({
         <main style={{ paddingTop: "var(--nav-height)" }}>
           {children}
         </main>
-        <CursorOverlay />
       </body>
     </html>
   );
