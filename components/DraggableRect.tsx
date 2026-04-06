@@ -69,8 +69,12 @@ export function DraggableRect({
 
   return (
     <div
+      data-draggable="true"
       onPointerDown={handlePointerDown}
-      onTouchStart={(e) => e.stopPropagation()}
+      onTouchStart={(e) => {
+        if (element.lockedBy && element.lockedBy !== myId) return;
+        e.stopPropagation(); // 👈 stops native touch reaching the canvas pan handler
+      }}
       style={{
         position: "absolute",
         left: element.x,

@@ -177,10 +177,15 @@ export function useCanvasTransform(containerRef: React.RefObject<HTMLElement>) {
     });
 
     const handleTouchStart = (e: TouchEvent) => {
+      // Don't pan if the touch started on a draggable element
+      if ((e.target as HTMLElement).closest('[data-draggable]')) return;
+
       if (e.touches.length === 2) {
         lastTouchDist = getTouchDist(e.touches[0], e.touches[1]);
         const rect = el.getBoundingClientRect();
         lastMidpoint = getMidpoint(e.touches[0], e.touches[1], rect);
+      } else if (e.touches.length === 1) {
+        lastSingleTouch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
       }
     };
 

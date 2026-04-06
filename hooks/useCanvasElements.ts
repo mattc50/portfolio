@@ -75,13 +75,15 @@ export function useCanvasElements(
 
       isDraggingId.current = element.id; // 👈 set dragging id
 
+      onCursorMove?.(element.x, element.y);
+
       setElements((prev) => ({
         ...prev,
         [element.id]: { ...prev[element.id], lockedBy: myId },
       }));
       socket?.send(JSON.stringify({ type: "rect:drag-start", id: element.id }));
     },
-    [socket, myId, containerRef, transformRef]
+    [socket, myId, containerRef, transformRef, onCursorMove]
   );
 
   const onPointerMove = useCallback(
