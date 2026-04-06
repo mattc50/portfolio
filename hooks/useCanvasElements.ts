@@ -17,7 +17,8 @@ export function useCanvasElements(
   socket: PartySocket | null,
   myId: string,
   containerRef?: React.RefObject<HTMLDivElement>,
-  transformRef?: React.RefObject<Transform>
+  transformRef?: React.RefObject<Transform>,
+  onCursorMove?: (x: number, y: number) => void
 ) {
   const [elements, setElements] = useState<Record<string, CanvasElement>>({});
   const dragOffset = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -109,6 +110,8 @@ export function useCanvasElements(
         Math.max(0, (originY - ty) / scale - dragOffset.current.y)
       );
 
+      onCursorMove?.(x, y);
+
       setElements((prev) => ({
         ...prev,
         [element.id]: { ...prev[element.id], x, y },
@@ -119,7 +122,7 @@ export function useCanvasElements(
         socket?.send(JSON.stringify({ type: "rect:move", id: element.id, x, y }));
       }, 16);
     },
-    [socket, containerRef, transformRef]
+    [socket, containerRef, transformRef, onCursorMove]
   );
 
   const onPointerUp = useCallback(

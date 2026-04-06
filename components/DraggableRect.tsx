@@ -113,6 +113,7 @@ export function DraggableRect({
       )}
       <button
         onPointerDown={(e) => e.stopPropagation()} // prevent triggering drag
+        onTouchStart={(e) => e.stopPropagation()}
         onClick={onRectClick}
         style={{
           width: "max-content",
