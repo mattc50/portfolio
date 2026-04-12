@@ -14,13 +14,17 @@ interface Props {
 }
 
 export function MultiplayerCanvas({ onRectClick }: Props) {
-  const [room, setRoom] = useState("root");
+  // const [room, setRoom] = useState("root");
   const identity = useRef(getOrCreateIdentity());
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLDivElement>(null);
   const [spaceHeld, setSpaceHeld] = useState(false);
 
   const canvasTransform = useCanvasTransform(containerRef);
+
+  const room = typeof window !== "undefined"
+    ? window.location.pathname.replace(/\/$/, "").replace(/^\//, "") || "root"
+    : "root";
 
   const socket = usePartySocket({
     host: process.env.NEXT_PUBLIC_PARTYKIT_HOST!,
@@ -60,11 +64,11 @@ export function MultiplayerCanvas({ onRectClick }: Props) {
   }, []);
 
   // Sync room to URL
-  useEffect(() => {
-    setRoom(
-      window.location.pathname.replace(/\/$/, "").replace(/^\//, "") || "root"
-    );
-  }, []);
+  // useEffect(() => {
+  //   setRoom(
+  //     window.location.pathname.replace(/\/$/, "").replace(/^\//, "") || "root"
+  //   );
+  // }, []);
 
   // isOutOfView: check if rect-1 is outside the visible canvas area accounting for transform
   const isOutOfView = useMemo(() => {

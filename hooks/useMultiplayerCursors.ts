@@ -12,8 +12,8 @@ export interface RemoteCursor {
   name: string;
 }
 
-const LERP_FACTOR = 0.25;
-const THROTTLE_MS = 8;
+const LERP_FACTOR = 0.18;
+const THROTTLE_MS = 6;
 
 export function useMultiplayerCursors(
   socket: PartySocket | null,
