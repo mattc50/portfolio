@@ -49,6 +49,7 @@ export function useMultiplayerCursors(
           )
         );
       } else if (data.type === "move") {
+        console.log("cursor move received", data);
         setCursors((prev) => ({
           ...prev,
           [data.id]: {
