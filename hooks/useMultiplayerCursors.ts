@@ -131,6 +131,8 @@ export function useMultiplayerCursors(
         const x = (e.clientX - rect.left - t.x) / t.scale;
         const y = (e.clientY - rect.top - t.y) / t.scale;
 
+        console.log("sending move", { x, y, socketReady: socket?.readyState });
+
         socket?.send(
           JSON.stringify({
             type: "move",
