@@ -114,8 +114,11 @@ export function useMultiplayerCursors(
     socket?.send(JSON.stringify({ type: "leave" }));
   }, [socket]);
 
+  // const sendLeaveRef = useRef(sendLeave);
+  // sendLeaveRef.current = sendLeave;
+
   useEffect(() => {
-    if (isTouchOnly.current || !socket) return;
+    if (!socket) return;
     console.log("registering mousemove listener");
 
     // const handleMouseMove = (e: MouseEvent) => {
@@ -205,7 +208,7 @@ export function useMultiplayerCursors(
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       sendLeave();
     };
-  }, [socket, sendLeave]);
+  }, [socket]);
 
   const sendCursorPosition = useCallback((x: number, y: number) => {
     socket?.send(
