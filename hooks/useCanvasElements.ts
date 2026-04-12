@@ -131,6 +131,8 @@ export function useCanvasElements(
 
   const onPointerUp = useCallback(
     (e: React.PointerEvent, element: CanvasElement) => {
+      console.log("pointerup fired", { pointerType: e.pointerType });
+
       isDraggingId.current = null; // 👈 clear on release
       socket?.send(JSON.stringify({ type: "rect:drag-end", id: element.id }));
 
