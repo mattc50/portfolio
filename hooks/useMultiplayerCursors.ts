@@ -211,7 +211,7 @@ export function useMultiplayerCursors(
       sendLeave();
       // sendLeaveRef.current();
     };
-  }, [socket]);
+  }, [socket, sendLeave]);
 
   const sendCursorPosition = useCallback((x: number, y: number) => {
     socket?.send(
