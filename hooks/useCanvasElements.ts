@@ -66,6 +66,8 @@ export function useCanvasElements(
       const rect = containerRef?.current?.getBoundingClientRect();
       const originX = rect ? e.clientX - rect.left : e.clientX;
       const originY = rect ? e.clientY - rect.top : e.clientY;
+      const pointerX = (originX - tx) / scale;
+      const pointerY = (originY - ty) / scale;
 
       dragOffset.current = {
         x: (originX - tx) / scale - element.x,
@@ -74,8 +76,9 @@ export function useCanvasElements(
 
       isDraggingId.current = element.id; // 👈 set dragging id
 
-      onCursorMove?.(element.x, element.y);
-      console.log("onCursorMove called with", element.x, element.y);
+      // onCursorMove?.(element.x, element.y);
+      onCursorMove?.(pointerX, pointerY);
+      // console.log("onCursorMove called with", element.x, element.y);
 
       setElements((prev) => ({
         ...prev,
@@ -103,6 +106,10 @@ export function useCanvasElements(
       // x = Math.max(0, x);
       // y = Math.max(0, y);
 
+      const pointerX = (originX - tx) / scale;
+      const pointerY = (originY - ty) / scale;
+      onCursorMove?.(pointerX, pointerY);
+
       const x = Math.min(
         CANVAS_WIDTH - element.width,   // 👈 can't go past right edge
         Math.max(0, (originX - tx) / scale - dragOffset.current.x)
@@ -112,7 +119,7 @@ export function useCanvasElements(
         Math.max(0, (originY - ty) / scale - dragOffset.current.y)
       );
 
-      onCursorMove?.(x, y);
+      // onCursorMove?.(x, y);
 
       setElements((prev) => ({
         ...prev,
@@ -131,6 +138,10 @@ export function useCanvasElements(
     (e: React.PointerEvent, element: CanvasElement) => {
       isDraggingId.current = null; // 👈 clear on release
       socket?.send(JSON.stringify({ type: "rect:drag-end", id: element.id }));
+
+      if (e.pointerType === "touch") {
+        socket?.send(JSON.stringify({ type: "leave" }));
+      }
     },
     [socket]
   );
