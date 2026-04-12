@@ -137,6 +137,7 @@ export function MultiplayerCanvas({ onRectClick }: Props) {
           position: "relative",
           backgroundColor: "var(--canvas)",
           cursor: spaceHeld ? "grab" : "default",
+          touchAction: "none",
         }}
         // onWheel={(e) => {
         //   const rect = containerRef.current?.getBoundingClientRect();
@@ -164,7 +165,6 @@ export function MultiplayerCanvas({ onRectClick }: Props) {
             height: 500,
             transform: `translate(${canvasTransform.transform.x}px, ${canvasTransform.transform.y}px) scale(${canvasTransform.transform.scale})`,
             transformOrigin: "0 0",
-            touchAction: "none",
           }}
         >
           {/* Elements layer */}

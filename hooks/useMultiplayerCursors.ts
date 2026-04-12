@@ -116,6 +116,7 @@ export function useMultiplayerCursors(
 
   useEffect(() => {
     if (isTouchOnly.current || !socket) return;
+    console.log("registering mousemove listener");
 
     // const handleMouseMove = (e: MouseEvent) => {
     //   clearTimeout(throttleTimer.current);
