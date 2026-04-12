@@ -74,10 +74,10 @@ export function useCanvasElements(
 
       isDraggingId.current = element.id; // 👈 set dragging id
 
-      const pointerX = (originX - tx) / scale;
-      const pointerY = (originY - ty) / scale;
-      onCursorMove?.(pointerX, pointerY);
-      // onCursorMove?.(element.x, element.y);
+      // const pointerX = (originX - tx) / scale;
+      // const pointerY = (originY - ty) / scale;
+      // onCursorMove?.(pointerX, pointerY);
+      onCursorMove?.(element.x, element.y);
 
       setElements((prev) => ({
         ...prev,
@@ -104,13 +104,13 @@ export function useCanvasElements(
 
       const x = Math.min(
         CANVAS_WIDTH - element.width,   // 👈 can't go past right edge
-        // Math.max(0, (originX - tx) / scale - dragOffset.current.x)
-        Math.max(0, pointerX - dragOffset.current.x)
+        Math.max(0, (originX - tx) / scale - dragOffset.current.x)
+        // Math.max(0, pointerX - dragOffset.current.x)
       );
       const y = Math.min(
         CANVAS_HEIGHT - element.height, // 👈 can't go past bottom edge
-        // Math.max(0, (originX - ty) / scale - dragOffset.current.y)
-        Math.max(0, pointerY - dragOffset.current.y)
+        Math.max(0, (originX - ty) / scale - dragOffset.current.y)
+        // Math.max(0, pointerY - dragOffset.current.y)
       );
 
       onCursorMove?.(pointerX, pointerY);
