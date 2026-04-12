@@ -50,7 +50,7 @@ export function useMultiplayerCursors(
           )
         );
       } else if (data.type === "move") {
-        console.log("cursor move received", data);
+        // console.log("cursor move received", data);
         setCursors((prev) => ({
           ...prev,
           [data.id]: {
@@ -119,7 +119,7 @@ export function useMultiplayerCursors(
 
   useEffect(() => {
     if (isTouchOnly.current || !socket) return;
-    console.log("registering mousemove listener");
+    // console.log("registering mousemove listener");
 
     // const handleMouseMove = (e: MouseEvent) => {
     //   clearTimeout(throttleTimer.current);
@@ -208,7 +208,7 @@ export function useMultiplayerCursors(
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("beforeunload", handleBeforeUnload);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      // sendLeave();
+      sendLeave();
       // sendLeaveRef.current();
     };
   }, [socket, sendLeave]);
