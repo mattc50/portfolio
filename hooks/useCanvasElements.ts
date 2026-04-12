@@ -115,7 +115,7 @@ export function useCanvasElements(
       );
       const y = Math.min(
         CANVAS_HEIGHT - element.height, // 👈 can't go past bottom edge
-        Math.max(0, pointerY / scale - dragOffset.current.y)
+        Math.max(0, pointerY - dragOffset.current.y)
       );
 
       onCursorMove?.(pointerX, pointerY);
@@ -139,9 +139,9 @@ export function useCanvasElements(
       isDraggingId.current = null; // 👈 clear on release
       socket?.send(JSON.stringify({ type: "rect:drag-end", id: element.id }));
 
-      // if (e.pointerType === "touch") {
-      //   socket?.send(JSON.stringify({ type: "leave" }));
-      // }
+      if (e.pointerType === "touch") {
+        socket?.send(JSON.stringify({ type: "leave" }));
+      }
     },
     [socket]
   );
