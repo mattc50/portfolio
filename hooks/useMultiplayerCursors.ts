@@ -115,23 +115,7 @@ export function useMultiplayerCursors(
   }, [socket]);
 
   useEffect(() => {
-    if (isTouchOnly.current || !socket) return;
-
-    // const handleMouseMove = (e: MouseEvent) => {
-    //   clearTimeout(throttleTimer.current);
-    //   throttleTimer.current = setTimeout(() => {
-    //     socket.send(
-    //       JSON.stringify({
-    //         type: "move",
-    //         x: e.clientX / window.innerWidth,
-    //         y: e.clientY / window.innerHeight,
-    //         color: identity.current.color,
-    //         name: identity.current.name,
-    //         id: identity.current.id,
-    //       })
-    //     );
-    //   }, THROTTLE_MS);
-    // };
+    if (!socket) return;
 
     const handleMouseMove = (e: MouseEvent) => {
       clearTimeout(throttleTimer.current);
@@ -142,20 +126,17 @@ export function useMultiplayerCursors(
         const rect = container.getBoundingClientRect();
         const t = transformRef?.current ?? { x: 0, y: 0, scale: 1 };
 
-        // Convert screen position → canvas-space
         const x = (e.clientX - rect.left - t.x) / t.scale;
         const y = (e.clientY - rect.top - t.y) / t.scale;
 
-        socket?.send(
-          JSON.stringify({
-            type: "move",
-            x,
-            y,
-            color: identity.current.color,
-            name: identity.current.name,
-            id: identity.current.id,
-          })
-        );
+        socket?.send(JSON.stringify({
+          type: "move",
+          x,
+          y,
+          color: identity.current.color,
+          name: identity.current.name,
+          id: identity.current.id,
+        }));
       }, THROTTLE_MS);
     };
 
@@ -169,19 +150,19 @@ export function useMultiplayerCursors(
         if (!container) return;
 
         const rect = container.getBoundingClientRect();
-        const x = (touch.clientX - rect.left - (transformRef?.current?.x ?? 0)) / (transformRef?.current?.scale ?? 1);
-        const y = (touch.clientY - rect.top - (transformRef?.current?.y ?? 0)) / (transformRef?.current?.scale ?? 1);
+        const t = transformRef?.current ?? { x: 0, y: 0, scale: 1 };
 
-        socket?.send(
-          JSON.stringify({
-            type: "move",
-            x,
-            y,
-            color: identity.current.color,
-            name: identity.current.name,
-            id: identity.current.id,
-          })
-        );
+        const x = (touch.clientX - rect.left - t.x) / t.scale;
+        const y = (touch.clientY - rect.top - t.y) / t.scale;
+
+        socket?.send(JSON.stringify({
+          type: "move",
+          x,
+          y,
+          color: identity.current.color,
+          name: identity.current.name,
+          id: identity.current.id,
+        }));
       }, THROTTLE_MS);
     };
 
@@ -191,6 +172,7 @@ export function useMultiplayerCursors(
 
     const handleBeforeUnload = () => sendLeave();
 
+    // 👇 register both — mouse won't fire on touch devices anyway
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("touchmove", handleTouchMove, { passive: true });
     window.addEventListener("beforeunload", handleBeforeUnload);
