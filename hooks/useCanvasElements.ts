@@ -99,8 +99,8 @@ export function useCanvasElements(
       const originX = rect ? e.clientX - rect.left : e.clientX;
       const originY = rect ? e.clientY - rect.top : e.clientY;
 
-      const pointerX = (originX - tx) / scale;
-      const pointerY = (originY - ty) / scale;
+      // const pointerX = (originX - tx) / scale;
+      // const pointerY = (originY - ty) / scale;
 
       const x = Math.min(
         CANVAS_WIDTH - element.width,   // 👈 can't go past right edge
@@ -113,8 +113,8 @@ export function useCanvasElements(
         // Math.max(0, pointerY - dragOffset.current.y)
       );
 
-      onCursorMove?.(pointerX, pointerY);
-      // onCursorMove?.(x, y);
+      // onCursorMove?.(pointerX, pointerY);
+      onCursorMove?.(x, y);
 
       setElements((prev) => ({
         ...prev,
