@@ -134,9 +134,9 @@ export function useCanvasElements(
       isDraggingId.current = null; // 👈 clear on release
       socket?.send(JSON.stringify({ type: "rect:drag-end", id: element.id }));
 
-      if (e.pointerType === "touch") {
-        socket?.send(JSON.stringify({ type: "leave" }));
-      }
+      // if (e.pointerType === "touch") {
+      //   socket?.send(JSON.stringify({ type: "leave" }));
+      // }
     },
     [socket]
   );
