@@ -48,6 +48,12 @@ export function DraggableRect({
       if (!isDragging.current) return;
       isDragging.current = false;
       onPointerUpRef.current(e as unknown as React.PointerEvent, elementRef.current);
+
+      window.dispatchEvent(new MouseEvent("mousemove", {
+        clientX: e.clientX,
+        clientY: e.clientY,
+        bubbles: true,
+      }));
     };
 
     window.addEventListener("pointermove", handleWindowPointerMove);
