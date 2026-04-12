@@ -18,18 +18,18 @@ const THROTTLE_MS = 6;
 export function useMultiplayerCursors(
   socket: PartySocket | null,
   containerRef?: React.RefObject<HTMLDivElement>,
-  transformRef?: React.RefObject<{ x: number; y: number; scale: number }> // 👈 add
+  transformRef?: React.RefObject<{ x: number; y: number; scale: number }>
 ) {
   const [cursors, setCursors] = useState<Record<string, RemoteCursor>>({});
   const identity = useRef(getOrCreateIdentity());
   const throttleTimer = useRef<ReturnType<typeof setTimeout>>();
   const rafHandle = useRef<number>();
+  const isUnmounting = useRef(false);
 
-  const isTouchOnly = useRef(false);
   useEffect(() => {
-    isTouchOnly.current =
-      window.matchMedia("(hover: none)").matches ||
-      navigator.maxTouchPoints > 0;
+    return () => {
+      isUnmounting.current = true;
+    };
   }, []);
 
   // ── Message handling ──────────────────────────────────────────────────────
@@ -39,7 +39,6 @@ export function useMultiplayerCursors(
     const handleMessage = (event: MessageEvent) => {
       const data = JSON.parse(event.data);
 
-      // Cursor-specific messages handled here
       if (data.type === "init") {
         setCursors(
           Object.fromEntries(
@@ -50,7 +49,6 @@ export function useMultiplayerCursors(
           )
         );
       } else if (data.type === "move") {
-        // console.log("cursor move received", data);
         setCursors((prev) => ({
           ...prev,
           [data.id]: {
@@ -109,7 +107,7 @@ export function useMultiplayerCursors(
     };
   }, []);
 
-  // ── Mouse tracking ────────────────────────────────────────────────────────
+  // ── Mouse/touch tracking ──────────────────────────────────────────────────
   const sendLeave = useCallback(() => {
     socket?.send(JSON.stringify({ type: "leave" }));
   }, [socket]);
@@ -118,24 +116,7 @@ export function useMultiplayerCursors(
   sendLeaveRef.current = sendLeave;
 
   useEffect(() => {
-    if (isTouchOnly.current || !socket) return;
-    // console.log("registering mousemove listener");
-
-    // const handleMouseMove = (e: MouseEvent) => {
-    //   clearTimeout(throttleTimer.current);
-    //   throttleTimer.current = setTimeout(() => {
-    //     socket.send(
-    //       JSON.stringify({
-    //         type: "move",
-    //         x: e.clientX / window.innerWidth,
-    //         y: e.clientY / window.innerHeight,
-    //         color: identity.current.color,
-    //         name: identity.current.name,
-    //         id: identity.current.id,
-    //       })
-    //     );
-    //   }, THROTTLE_MS);
-    // };
+    if (!socket) return;
 
     const handleMouseMove = (e: MouseEvent) => {
       clearTimeout(throttleTimer.current);
@@ -146,7 +127,6 @@ export function useMultiplayerCursors(
         const rect = container.getBoundingClientRect();
         const t = transformRef?.current ?? { x: 0, y: 0, scale: 1 };
 
-        // Convert screen position → canvas-space
         const x = (e.clientX - rect.left - t.x) / t.scale;
         const y = (e.clientY - rect.top - t.y) / t.scale;
 
@@ -173,8 +153,10 @@ export function useMultiplayerCursors(
         if (!container) return;
 
         const rect = container.getBoundingClientRect();
-        const x = (touch.clientX - rect.left - (transformRef?.current?.x ?? 0)) / (transformRef?.current?.scale ?? 1);
-        const y = (touch.clientY - rect.top - (transformRef?.current?.y ?? 0)) / (transformRef?.current?.scale ?? 1);
+        const t = transformRef?.current ?? { x: 0, y: 0, scale: 1 };
+
+        const x = (touch.clientX - rect.left - t.x) / t.scale;
+        const y = (touch.clientY - rect.top - t.y) / t.scale;
 
         socket?.send(
           JSON.stringify({
@@ -190,11 +172,9 @@ export function useMultiplayerCursors(
     };
 
     const handleVisibilityChange = () => {
-      // if (document.hidden) sendLeave();
       if (document.hidden) sendLeaveRef.current();
     };
 
-    // const handleBeforeUnload = () => sendLeave();
     const handleBeforeUnload = () => sendLeaveRef.current();
 
     window.addEventListener("mousemove", handleMouseMove);
@@ -208,8 +188,7 @@ export function useMultiplayerCursors(
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("beforeunload", handleBeforeUnload);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      // sendLeave();
-      sendLeaveRef.current();
+      if (isUnmounting.current) sendLeaveRef.current(); // 👈 only on unmount
     };
   }, [socket]);
 
@@ -226,5 +205,5 @@ export function useMultiplayerCursors(
     );
   }, [socket]);
 
-  return { cursors, sendCursorPosition }; // 👈 export it
+  return { cursors, sendCursorPosition };
 }
