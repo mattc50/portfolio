@@ -114,8 +114,8 @@ export function useMultiplayerCursors(
     socket?.send(JSON.stringify({ type: "leave" }));
   }, [socket]);
 
-  const sendLeaveRef = useRef(sendLeave);
-  sendLeaveRef.current = sendLeave;
+  // const sendLeaveRef = useRef(sendLeave);
+  // sendLeaveRef.current = sendLeave;
 
   useEffect(() => {
     if (isTouchOnly.current || !socket) return;
@@ -190,12 +190,12 @@ export function useMultiplayerCursors(
     };
 
     const handleVisibilityChange = () => {
-      // if (document.hidden) sendLeave();
-      if (document.hidden) sendLeaveRef.current();
+      if (document.hidden) sendLeave();
+      // if (document.hidden) sendLeaveRef.current();
     };
 
-    // const handleBeforeUnload = () => sendLeave();
-    const handleBeforeUnload = () => sendLeaveRef.current();
+    const handleBeforeUnload = () => sendLeave();
+    // const handleBeforeUnload = () => sendLeaveRef.current();
 
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("touchmove", handleTouchMove, { passive: true });
@@ -208,8 +208,8 @@ export function useMultiplayerCursors(
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("beforeunload", handleBeforeUnload);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
-      // sendLeave();
-      sendLeaveRef.current();
+      sendLeave();
+      // sendLeaveRef.current();
     };
   }, [socket]);
 

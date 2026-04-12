@@ -74,10 +74,10 @@ export function useCanvasElements(
 
       isDraggingId.current = element.id; // 👈 set dragging id
 
-      // const pointerX = (originX - tx) / scale;
-      // const pointerY = (originY - ty) / scale;
-      // onCursorMove?.(pointerX, pointerY);
-      onCursorMove?.(element.x, element.y);
+      const pointerX = (originX - tx) / scale;
+      const pointerY = (originY - ty) / scale;
+      onCursorMove?.(pointerX, pointerY);
+      // onCursorMove?.(element.x, element.y);
 
       setElements((prev) => ({
         ...prev,
@@ -111,8 +111,8 @@ export function useCanvasElements(
         Math.max(0, pointerY - dragOffset.current.y)
       );
 
-      // onCursorMove?.(pointerX, pointerY);
-      onCursorMove?.(x, y);
+      onCursorMove?.(pointerX, pointerY);
+      // onCursorMove?.(x, y);
 
       setElements((prev) => ({
         ...prev,
