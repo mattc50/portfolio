@@ -141,9 +141,20 @@ export function useCanvasElements(
 
       if (e.pointerType === "touch") {
         socket?.send(JSON.stringify({ type: "leave" }));
+      } else {
+        // 👇 broadcast final pointer position for mouse/pen so cursor doesn't freeze
+        const scale = transformRef?.current?.scale ?? 1;
+        const tx = transformRef?.current?.x ?? 0;
+        const ty = transformRef?.current?.y ?? 0;
+        const rect = containerRef?.current?.getBoundingClientRect();
+        const originX = rect ? e.clientX - rect.left : e.clientX;
+        const originY = rect ? e.clientY - rect.top : e.clientY;
+        const pointerX = (originX - tx) / scale;
+        const pointerY = (originY - ty) / scale;
+        onCursorMove?.(pointerX, pointerY);
       }
     },
-    [socket]
+    [socket, containerRef, transformRef, onCursorMove]
   );
 
   return { elements, onPointerDown, onPointerMove, onPointerUp };
