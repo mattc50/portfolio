@@ -181,14 +181,14 @@ export function useMultiplayerCursors(
 
     const handleBeforeUnload = () => sendLeaveRef.current();
 
-    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove, true);
     window.addEventListener("touchmove", handleTouchMove, { passive: true });
     window.addEventListener("beforeunload", handleBeforeUnload);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       clearTimeout(throttleTimer.current);
-      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mousemove", handleMouseMove, true);
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("beforeunload", handleBeforeUnload);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
