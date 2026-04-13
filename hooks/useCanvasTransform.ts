@@ -117,8 +117,12 @@ export function useCanvasTransform(containerRef: React.RefObject<HTMLElement>) {
     });
   }, []);
 
-  const onPointerUp = useCallback(() => {
+  const onPointerUp = useCallback((e: React.PointerEvent) => {
     isPanning.current = false;
+
+    try {
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
+    } catch (_) { }
   }, []);
 
   const reset = useCallback(() => setTransform({ x: 0, y: 0, scale: 1 }), []);
@@ -167,7 +171,7 @@ export function useCanvasTransform(containerRef: React.RefObject<HTMLElement>) {
     let lastTouchDist = 0;
     let lastMidpoint = { x: 0, y: 0 };
     let lastSingleTouch = { x: 0, y: 0 };
-    let isPanning = false; // 👈 add alongside other let variables
+    let isTouchPanning = false; // 👈 add alongside other let variables
 
     const getTouchDist = (a: Touch, b: Touch) =>
       Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY);
@@ -180,11 +184,11 @@ export function useCanvasTransform(containerRef: React.RefObject<HTMLElement>) {
     const handleTouchStart = (e: TouchEvent) => {
       // Don't pan if the touch started on a draggable element
       if ((e.target as HTMLElement).closest('[data-draggable]')) {
-        isPanning = false; // 👈 touch started on rect, don't pan
+        isTouchPanning = false; // 👈 touch started on rect, don't pan
         return;
       }
 
-      isPanning = true; // 👈 touch started on canvas, pan
+      isTouchPanning = true; // 👈 touch started on canvas, pan
 
       if (e.touches.length === 2) {
         lastTouchDist = getTouchDist(e.touches[0], e.touches[1]);
@@ -229,14 +233,25 @@ export function useCanvasTransform(containerRef: React.RefObject<HTMLElement>) {
       }
     };
 
+    const handleWindowPointerUp = (e: PointerEvent) => {
+      if (!isPanning.current) return;
+      isPanning.current = false;
+      try {
+        (containerRef.current as HTMLElement)?.releasePointerCapture(e.pointerId);
+      } catch (_) { }
+    };
+
     el.addEventListener("wheel", handler, { passive: false });
     el.addEventListener("touchstart", handleTouchStart, { passive: true });
     el.addEventListener("touchmove", handleTouchMove, { passive: false }); // non-passive to preventDefault
+    window.addEventListener("pointerup", handleWindowPointerUp);
 
     return () => {
       el.removeEventListener("wheel", handler);
       el.removeEventListener("touchstart", handleTouchStart);
       el.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("pointerup", handleWindowPointerUp);
+
     }
   }, [containerRef]);
 
