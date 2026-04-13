@@ -156,6 +156,15 @@ export function MultiplayerCanvas({ onRectClick }: Props) {
         }}
         onPointerMove={(e) => {
           canvasTransform.onPointerMove(e);
+          // 👇 track cursor at container level
+          if (e.pointerType === "mouse") {
+            const rect = containerRef.current?.getBoundingClientRect();
+            if (!rect) return;
+            const t = canvasTransform.transformRef.current;
+            const x = (e.clientX - rect.left - t.x) / t.scale;
+            const y = (e.clientY - rect.top - t.y) / t.scale;
+            sendCursorPosition(x, y);
+          }
         }}
         onPointerUp={canvasTransform.onPointerUp}
       >
