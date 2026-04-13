@@ -65,6 +65,8 @@ export function DraggableRect({
     e.stopPropagation(); // prevent canvas pan from triggering
     isDragging.current = true;
     // console.log("isDragging set to true");
+
+    e.currentTarget.releasePointerCapture(e.pointerId);
     onPointerDown(e, element);
   };
 
