@@ -109,7 +109,7 @@ export function useCanvasElements(
       );
       const y = Math.min(
         CANVAS_HEIGHT - element.height, // 👈 can't go past bottom edge
-        Math.max(0, (originX - ty) / scale - dragOffset.current.y)
+        Math.max(0, (originY - ty) / scale - dragOffset.current.y)
         // Math.max(0, pointerY - dragOffset.current.y)
       );
 

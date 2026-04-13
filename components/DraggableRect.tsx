@@ -48,6 +48,7 @@ export function DraggableRect({
       if (!isDragging.current) return;
       isDragging.current = false;
       onPointerUpRef.current(e as unknown as React.PointerEvent, elementRef.current);
+      document.body.focus();
     };
 
     window.addEventListener("pointermove", handleWindowPointerMove);
