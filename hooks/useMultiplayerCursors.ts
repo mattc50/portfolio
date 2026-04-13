@@ -138,6 +138,7 @@ export function useMultiplayerCursors(
     // };
 
     const handleMouseMove = (e: MouseEvent) => {
+      console.log("mousemove fired", { isTrusted: e.isTrusted });
       clearTimeout(throttleTimer.current);
       throttleTimer.current = setTimeout(() => {
         const container = containerRef?.current;
@@ -149,6 +150,8 @@ export function useMultiplayerCursors(
         // Convert screen position → canvas-space
         const x = (e.clientX - rect.left - t.x) / t.scale;
         const y = (e.clientY - rect.top - t.y) / t.scale;
+
+        console.log("sending move", { x, y, socketReady: socket?.readyState });
 
         socket?.send(
           JSON.stringify({
