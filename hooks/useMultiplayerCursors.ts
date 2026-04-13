@@ -137,7 +137,8 @@ export function useMultiplayerCursors(
     //   }, THROTTLE_MS);
     // };
 
-    const handlePointerMove = (e: MouseEvent) => {
+    const handlePointerMove = (e: PointerEvent) => {
+      if (e.pointerType !== "mouse") return;
       console.log("mousemove", { isTrusted: e.isTrusted, timestamp: Date.now() });
       clearTimeout(throttleTimer.current);
       throttleTimer.current = setTimeout(() => {
