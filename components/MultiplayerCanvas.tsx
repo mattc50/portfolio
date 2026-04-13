@@ -155,6 +155,7 @@ export function MultiplayerCanvas({ onRectClick }: Props) {
           }
         }}
         onPointerMove={(e) => {
+          console.log("container pointermove", { pointerType: e.pointerType, isTrusted: e.isTrusted });
           canvasTransform.onPointerMove(e);
           // 👇 track cursor at container level
           if (e.pointerType === "mouse") {
