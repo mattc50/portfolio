@@ -2,6 +2,7 @@ import type { CanvasElement } from "@/hooks/useCanvasElements";
 import type { RemoteCursor } from "@/hooks/useMultiplayerCursors";
 import { useRef, useState } from "react";
 import GuestbookCount from "./GuestbookCount";
+import { createPortal } from "react-dom";
 
 interface Props {
   element: CanvasElement;
@@ -51,7 +52,7 @@ export function DraggableRect({
     <>
       {/* Fullscreen overlay during drag — captures all pointer events,
           bypassing Chrome's post-pointerdown suppression */}
-      {isDraggingState && (
+      {isDraggingState && createPortal(
         <div
           style={{
             position: "fixed",
@@ -141,6 +142,7 @@ export function DraggableRect({
           <GuestbookCount />
         </button>
       </div>
-    </>
+    </>,
+    document.body
   );
 }
