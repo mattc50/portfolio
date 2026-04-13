@@ -47,6 +47,12 @@ export function DraggableRect({
     const handleWindowPointerUp = (e: PointerEvent) => {
       if (!isDragging.current) return;
       isDragging.current = false;
+
+      const target = e.target as HTMLElement;
+      if (target.hasPointerCapture(e.pointerId)) {
+        target.releasePointerCapture(e.pointerId);
+      }
+
       onPointerUpRef.current(e as unknown as React.PointerEvent, elementRef.current);
 
       window.dispatchEvent(new MouseEvent("mousemove", {
