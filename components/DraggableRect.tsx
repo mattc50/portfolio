@@ -1,8 +1,7 @@
 import type { CanvasElement } from "@/hooks/useCanvasElements";
 import type { RemoteCursor } from "@/hooks/useMultiplayerCursors";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import GuestbookCount from "./GuestbookCount";
-import { createPortal } from "react-dom";
 
 interface Props {
   element: CanvasElement;
@@ -27,10 +26,10 @@ export function DraggableRect({
   const isLockedByOther = element.lockedBy && element.lockedBy !== myId;
   const lockingCursor = element.lockedBy ? cursors[element.lockedBy] : null;
   const lockColor = lockingCursor?.color ?? "#888";
+  const [isDraggingState, setIsDraggingState] = useState(false);
 
-  // const [isDraggingState, setIsDraggingState] = useState(false);
-
-  // Keep latest callbacks + element in refs so overlay handlers don't go stale
+  const isDragging = useRef(false);
+  // Keep latest callbacks + element in refs so window listeners don't go stale
   const onPointerMoveRef = useRef(onPointerMove);
   const onPointerUpRef = useRef(onPointerUp);
   const elementRef = useRef(element);
@@ -38,110 +37,120 @@ export function DraggableRect({
   onPointerUpRef.current = onPointerUp;
   elementRef.current = element;
 
-  // useEffect and window listeners removed — overlay handles everything
+  useEffect(() => {
+    const handleWindowPointerMove = (e: PointerEvent) => {
+      // console.log("window pointermove", { isDragging: isDragging.current });
+      if (!isDragging.current) return;
+      // Cast to React.PointerEvent shape — the fields we use are identical
+      onPointerMoveRef.current(e as unknown as React.PointerEvent, elementRef.current);
+    };
+
+    const handleWindowPointerUp = (e: PointerEvent) => {
+      if (!isDragging.current) return;
+      isDragging.current = false;
+      onPointerUpRef.current(e as unknown as React.PointerEvent, elementRef.current);
+
+      console.log("pointerup - checking capture", {
+        hasCapture: (e.target as HTMLElement).hasPointerCapture?.(e.pointerId),
+        target: (e.target as HTMLElement).tagName,
+        pointerId: e.pointerId,
+      });
+
+      document.body.focus();
+    };
+
+    window.addEventListener("pointermove", handleWindowPointerMove);
+    window.addEventListener("pointerup", handleWindowPointerUp);
+    return () => {
+      window.removeEventListener("pointermove", handleWindowPointerMove);
+      window.removeEventListener("pointerup", handleWindowPointerUp);
+    };
+  }, []); // empty — refs keep everything current
 
   const handlePointerDown = (e: React.PointerEvent) => {
+    // console.log("pointerdown on rect", { lockedBy: element.lockedBy, myId });
     if (element.lockedBy && element.lockedBy !== myId) return;
-    e.stopPropagation();
+    e.stopPropagation(); // prevent canvas pan from triggering
+    isDragging.current = true;
+    // console.log("isDragging set to true");
+
     e.currentTarget.releasePointerCapture(e.pointerId);
-    // setIsDraggingState(true);
+    setIsDraggingState(true);
     onPointerDown(e, element);
   };
 
   return (
-    <>
-      {/* Fullscreen overlay during drag — captures all pointer events,
-          bypassing Chrome's post-pointerdown suppression */}
-      {/* {isDraggingState && createPortal(
+    <div
+      data-draggable="true"
+      onPointerDown={handlePointerDown}
+      onTouchStart={(e) => {
+        if (element.lockedBy && element.lockedBy !== myId) return;
+        e.stopPropagation(); // 👈 stops native touch reaching the canvas pan handler
+      }}
+      style={{
+        position: "absolute",
+        left: element.x,
+        top: element.y,
+        width: element.width,
+        height: element.height,
+        backgroundColor: "rgba(255, 255, 255, 0.08)",
+        border: isLockedByOther
+          ? `2px solid ${lockColor}`
+          : isLockedByMe
+            ? "2px solid rgba(255,255,255,0.6)"
+            : "1px solid rgba(255,255,255,0.2)",
+        borderRadius: 6,
+        cursor: isLockedByOther ? "not-allowed" : isLockedByMe ? "grabbing" : "grab",
+        userSelect: "none",
+        touchAction: "none",
+        backdropFilter: "blur(4px)",
+        transition: isLockedByMe ? "none" : "border 0.15s ease",
+        boxShadow: isLockedByMe
+          ? "0 8px 32px rgba(0,0,0,0.3)"
+          : "0 2px 8px rgba(0,0,0,0.15)",
+      }}
+    >
+      {isLockedByOther && lockingCursor && (
         <div
           style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 9999,
-            cursor: "grabbing",
-          }}
-          onPointerMove={(e) => {
-            onPointerMoveRef.current(e, elementRef.current);
-          }}
-          onPointerUp={(e) => {
-            setIsDraggingState(false);
-            onPointerUpRef.current(e, elementRef.current);
-          }}
-        />
-      )} */}
-
-      <div
-        data-draggable="true"
-        onPointerDown={handlePointerDown}
-        onTouchStart={(e) => {
-          if (element.lockedBy && element.lockedBy !== myId) return;
-          e.stopPropagation();
-        }}
-        style={{
-          position: "absolute",
-          left: element.x,
-          top: element.y,
-          width: element.width,
-          height: element.height,
-          backgroundColor: "rgba(255, 255, 255, 0.08)",
-          border: isLockedByOther
-            ? `2px solid ${lockColor}`
-            : isLockedByMe
-              ? "2px solid rgba(255,255,255,0.6)"
-              : "1px solid rgba(255,255,255,0.2)",
-          borderRadius: 6,
-          cursor: isLockedByOther ? "not-allowed" : isLockedByMe ? "grabbing" : "grab",
-          userSelect: "none",
-          touchAction: "none",
-          backdropFilter: "blur(4px)",
-          transition: isLockedByMe ? "none" : "border 0.15s ease",
-          boxShadow: isLockedByMe
-            ? "0 8px 32px rgba(0,0,0,0.3)"
-            : "0 2px 8px rgba(0,0,0,0.15)",
-        }}
-      >
-        {isLockedByOther && lockingCursor && (
-          <div
-            style={{
-              position: "absolute",
-              top: -24,
-              left: 0,
-              background: lockColor,
-              color: "white",
-              fontSize: 10,
-              fontWeight: 500,
-              padding: "2px 6px",
-              borderRadius: 3,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {lockingCursor.name}
-          </div>
-        )}
-        <button
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={onRectClick}
-          style={{
-            width: "max-content",
             position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            zIndex: 100,
-            padding: "6px 12px",
-            fontSize: 12,
+            top: -24,
+            left: 0,
+            background: lockColor,
+            color: "white",
+            fontSize: 10,
             fontWeight: 500,
-            background: "rgba(0, 0, 0, 0.03)",
-            color: "var(--ink)",
-            border: "1px solid var(--border)",
-            borderRadius: 6,
-            cursor: "pointer",
+            padding: "2px 6px",
+            borderRadius: 3,
+            whiteSpace: "nowrap",
           }}
         >
-          <p>Sign the guestbook!</p>
-          <GuestbookCount />
-        </button>
-      </div>
-    </>
+          {lockingCursor.name}
+        </div>
+      )}
+      <button
+        onPointerDown={(e) => e.stopPropagation()} // prevent triggering drag
+        onClick={onRectClick}
+        style={{
+          width: "max-content",
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          zIndex: 100,
+          padding: "6px 12px",
+          fontSize: 12,
+          fontWeight: 500,
+          background: "rgba(0, 0, 0, 0.03)",
+          color: "var(--ink)",
+          border: "1px solid var(--border)",
+          borderRadius: 6,
+          cursor: "pointer",
+        }}
+      >
+        <p>Sign the guestbook!</p>
+        <GuestbookCount />
+      </button>
+    </div>
   );
 }
