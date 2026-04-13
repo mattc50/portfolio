@@ -105,6 +105,12 @@ export function MultiplayerCanvas({ onRectClick }: Props) {
     });
   };
 
+  useEffect(() => {
+    window.addEventListener("pointermove", (e) => {
+      console.log("raw pointermove", { pointerType: e.pointerType, isTrusted: e.isTrusted });
+    });
+  }, [])
+
   return (
     <div style={{ position: "relative", backgroundColor: "var(--canvas)" }}>
       {isOutOfView && (
