@@ -52,7 +52,7 @@ export function DraggableRect({
     <>
       {/* Fullscreen overlay during drag — captures all pointer events,
           bypassing Chrome's post-pointerdown suppression */}
-      {isDraggingState && createPortal(
+      {/* {isDraggingState && createPortal(
         <div
           style={{
             position: "fixed",
@@ -68,7 +68,7 @@ export function DraggableRect({
             onPointerUpRef.current(e, elementRef.current);
           }}
         />
-      )}
+      )} */}
 
       <div
         data-draggable="true"
@@ -142,7 +142,6 @@ export function DraggableRect({
           <GuestbookCount />
         </button>
       </div>
-    </>,
-    document.body
+    </>
   );
 }
