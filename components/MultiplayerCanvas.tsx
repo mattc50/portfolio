@@ -180,7 +180,7 @@ export function MultiplayerCanvas({ onRectClick }: Props) {
             height: 500,
             transform: `translate(${canvasTransform.transform.x}px, ${canvasTransform.transform.y}px) scale(${canvasTransform.transform.scale})`,
             transformOrigin: "0 0",
-            // touchAction: "none",
+            touchAction: "none",
           }}
         >
           {/* Elements layer */}
