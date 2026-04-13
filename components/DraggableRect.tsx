@@ -28,7 +28,7 @@ export function DraggableRect({
   const lockingCursor = element.lockedBy ? cursors[element.lockedBy] : null;
   const lockColor = lockingCursor?.color ?? "#888";
 
-  const [isDraggingState, setIsDraggingState] = useState(false);
+  // const [isDraggingState, setIsDraggingState] = useState(false);
 
   // Keep latest callbacks + element in refs so overlay handlers don't go stale
   const onPointerMoveRef = useRef(onPointerMove);
@@ -44,7 +44,7 @@ export function DraggableRect({
     if (element.lockedBy && element.lockedBy !== myId) return;
     e.stopPropagation();
     e.currentTarget.releasePointerCapture(e.pointerId);
-    setIsDraggingState(true);
+    // setIsDraggingState(true);
     onPointerDown(e, element);
   };
 
