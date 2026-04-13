@@ -137,7 +137,7 @@ export function useMultiplayerCursors(
     //   }, THROTTLE_MS);
     // };
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const handlePointerMove = (e: MouseEvent) => {
       console.log("mousemove", { isTrusted: e.isTrusted, timestamp: Date.now() });
       clearTimeout(throttleTimer.current);
       throttleTimer.current = setTimeout(() => {
@@ -200,14 +200,16 @@ export function useMultiplayerCursors(
     const handleBeforeUnload = () => sendLeave();
     // const handleBeforeUnload = () => sendLeaveRef.current();
 
-    window.addEventListener("mousemove", handleMouseMove);
+    // window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("pointermove", handlePointerMove);
     window.addEventListener("touchmove", handleTouchMove, { passive: true });
     window.addEventListener("beforeunload", handleBeforeUnload);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       clearTimeout(throttleTimer.current);
-      window.removeEventListener("mousemove", handleMouseMove);
+      // window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("pointermove", handlePointerMove);
       window.removeEventListener("touchmove", handleTouchMove);
       window.removeEventListener("beforeunload", handleBeforeUnload);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
