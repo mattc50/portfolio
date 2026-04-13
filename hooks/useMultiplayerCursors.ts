@@ -138,7 +138,7 @@ export function useMultiplayerCursors(
     // };
 
     const handleMouseMove = (e: MouseEvent) => {
-      console.log("mousemove fired", { isTrusted: e.isTrusted });
+      console.log("mousemove", { isTrusted: e.isTrusted, timestamp: Date.now() });
       clearTimeout(throttleTimer.current);
       throttleTimer.current = setTimeout(() => {
         const container = containerRef?.current;

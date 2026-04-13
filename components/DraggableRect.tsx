@@ -48,6 +48,13 @@ export function DraggableRect({
       if (!isDragging.current) return;
       isDragging.current = false;
       onPointerUpRef.current(e as unknown as React.PointerEvent, elementRef.current);
+
+      console.log("pointerup - checking capture", {
+        hasCapture: (e.target as HTMLElement).hasPointerCapture?.(e.pointerId),
+        target: (e.target as HTMLElement).tagName,
+        pointerId: e.pointerId,
+      });
+
       document.body.focus();
     };
 
