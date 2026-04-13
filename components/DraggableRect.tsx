@@ -60,6 +60,7 @@ export function DraggableRect({
         clientY: e.clientY,
         bubbles: true,
       }));
+      document.body.focus();
     };
 
     window.addEventListener("pointermove", handleWindowPointerMove);
