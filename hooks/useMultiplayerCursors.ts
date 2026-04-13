@@ -50,7 +50,7 @@ export function useMultiplayerCursors(
           )
         );
       } else if (data.type === "move") {
-        console.log("cursor move received", data);
+        // console.log("cursor move received", data);
         setCursors((prev) => ({
           ...prev,
           [data.id]: {
@@ -119,7 +119,7 @@ export function useMultiplayerCursors(
 
   useEffect(() => {
     if (isTouchOnly.current || !socket) return;
-    console.log("registering mousemove listener");
+    // console.log("registering mousemove listener");
 
     // const handleMouseMove = (e: MouseEvent) => {
     //   clearTimeout(throttleTimer.current);
@@ -139,7 +139,7 @@ export function useMultiplayerCursors(
 
     const handlePointerMove = (e: PointerEvent) => {
       if (e.pointerType !== "mouse") return;
-      console.log("mousemove", { isTrusted: e.isTrusted, timestamp: Date.now() });
+      // console.log("mousemove", { isTrusted: e.isTrusted, timestamp: Date.now() });
       clearTimeout(throttleTimer.current);
       throttleTimer.current = setTimeout(() => {
         const container = containerRef?.current;
@@ -152,7 +152,7 @@ export function useMultiplayerCursors(
         const x = (e.clientX - rect.left - t.x) / t.scale;
         const y = (e.clientY - rect.top - t.y) / t.scale;
 
-        console.log("sending move", { x, y, socketReady: socket?.readyState });
+        // console.log("sending move", { x, y, socketReady: socket?.readyState });
 
         socket?.send(
           JSON.stringify({
