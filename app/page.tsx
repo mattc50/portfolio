@@ -42,10 +42,6 @@ export default function Home() {
             </p>
           </div>
 
-          {/* <div className={`${styles.header} anim-fade-up`}>
-            <h4 className={styles.heading4}>Projects</h4>
-          </div> */}
-
           <div className={styles.grid}>
             {projects.map((project, i) => (
               <ProjectCard key={project.slug} project={project} index={i} />

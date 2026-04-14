@@ -21,7 +21,6 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
         style={project.accentColor ? { backgroundColor: project.accentColor + "22" } : {}}
       >
         {project.coverImage ? (
-          // eslint-disable-next-line @next/next/no-img-element
           <img src={project.coverImage} alt={project.title} className={styles.coverImg} />
         ) : (
           <div className={styles.coverPlaceholder}>

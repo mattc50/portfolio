@@ -23,11 +23,6 @@ export default function ProjectPage({ params }: { params: { slug: string } }) {
   const project = getProjectBySlug(params.slug);
   if (!project) notFound();
 
-  const paragraphs = project.description
-    .split("\n\n")
-    .map((p) => p.trim())
-    .filter(Boolean);
-
   return (
     <>
       <article className={styles.article}>
@@ -72,9 +67,7 @@ export default function ProjectPage({ params }: { params: { slug: string } }) {
         {/* Body */}
         <div className={styles.body}>
           <div className={`${styles.description} anim-fade-up delay-2`}>
-            {paragraphs.map((para, i) => (
-              <p key={i}>{para}</p>
-            ))}
+            {project.description}
           </div>
 
           <aside className={`anim-fade-up delay-3`}>

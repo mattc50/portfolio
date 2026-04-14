@@ -137,8 +137,13 @@
 }
 
 .description p {
+  color: var(--muted);
   font-size: var(--font-size-base);
   line-height: 1.7;
+}
+
+.description strong {
+  color: var(--ink);
 }
 
 /* Sidebar / Figma CTA */

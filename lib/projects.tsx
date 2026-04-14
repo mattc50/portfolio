@@ -3,6 +3,8 @@
 // Add, remove, or reorder projects here — pages update automatically.
 // ────────────────────────────────────────────────────────────────────────────
 
+import { ReactNode } from "react";
+
 export type ProjectRole =
   | "Product Design"
   | "Design Engineering"
@@ -19,7 +21,7 @@ export interface Project {
   /** One-line description shown on the project card */
   tagline: string;
   /** Full description shown on the project detail page */
-  description: string;
+  description: ReactNode;
   /** Company or client */
   company: string;
   /** Year(s), e.g. "2024" or "2023–2024" */
@@ -52,7 +54,11 @@ export const projects: Project[] = [
     slug: "isonic-unified-inbox",
     title: "iSonic Unified Inbox",
     tagline: "Turning fragmented creator conversations into a unified, content-aware response system.",
-    description: `I led end-to-end design of the Unified Inbox: from product definition and interaction architecture through high-fidelity interface design and system-level component work. The experience helps content creators consolidate messages that are fragmented across social platforms\u00A0—\u00A0connecting each conversation to their content library, and enabling AI-assisted replies that remain grounded in existing content and customizable brand voice.`,
+    description: (
+      <>
+        <p>I led end-to-end design of the Unified Inbox: from product definition and interaction architecture through high-fidelity interface design and system-level component work. The experience <strong>helps content creators consolidate messages that are fragmented across social platforms</strong>&nbsp;—&nbsp;connecting each conversation to their content library, and enabling AI-assisted replies that remain grounded in existing content and customizable brand voice.</p>
+      </>
+    ),
     company: "iSonic.ai",
     year: "2025",
     roles: ["Product Design", "Design Systems", "Frontend Engineering"],
@@ -64,7 +70,11 @@ export const projects: Project[] = [
     slug: "lenz",
     title: "Lenz",
     tagline: "Transforming property inspections into a self-serve, evidence-driven experience for tenants.",
-    description: `I led end-to-end product design for Lenz, a tenancy inspection platform built to help renters independently document property condition across check-in, mid-term, and check-out stages. I translated inspection requirements into a progressive mobile workflow, designed reporting and comparison systems that make evidence easy to capture and review, and implemented advanced React Native interactions\u00A0—\u00A0including animated components and a dynamic tenancy timeline\u00A0—\u00A0to preserve a rich, trustworthy user experience in production.`,
+    description: (
+      <>
+        <p>I led end-to-end product design for Lenz, a tenancy inspection platform built to <strong>empower renters to independently document property condition</strong>  across check-in, mid-term, and check-out stages. I translated inspection requirements into a progressive mobile workflow, designed reporting and comparison systems that make evidence easy to capture and review, and implemented advanced React Native interactions&nbsp;—&nbsp;including animated components and a dynamic tenancy timeline&nbsp;—&nbsp;to preserve a rich, trustworthy user experience in production.</p>
+      </>
+    ),
     company: "Lenz",
     year: "2024",
     roles: ["Product Design", "UX Design", "Frontend Engineering"],
@@ -76,7 +86,11 @@ export const projects: Project[] = [
     slug: "venmo-split",
     title: "Venmo Split",
     tagline: "Reframing peer-to-peer payments around the social moments they support.",
-    description: `I designed Venmo Split as a research-led enhancement to Venmo's core payment flow, identifying how people manage shared expenses and translating those behaviors into a multi-person bill-splitting experience. From interviews and affinity mapping through an information architecture enhancement, interaction design, and high-fidelity prototyping, I created a receipt-based request flow that simplifies item assignment, tax and tip distribution, and reimbursement visibility while staying consistent with Venmo's existing design language.`,
+    description: (
+      <>
+        <p>I designed Venmo Split as a research-led enhancement to Venmo's core payment flow, identifying <strong>how people manage shared expenses</strong> and translating those behaviors into a multi-person bill-splitting experience. From interviews and affinity mapping through an information architecture enhancement, interaction design, and high-fidelity prototyping, I created a receipt-based request flow that simplifies item assignment, tax and tip distribution, and reimbursement visibility while staying consistent with Venmo's existing design language.</p>
+      </>
+    ),
     company: "Case Study",
     year: "2023",
     roles: ["Product Design", "UX Design"],
@@ -88,7 +102,11 @@ export const projects: Project[] = [
     slug: "d1g1t-billing-solution",
     title: "d1g1t Billing Solution",
     tagline: "Powering how advisory firms manage fees at scale.",
-    description: `I designed the user experience and interfaces for d1g1t's billing solution, providing wealth management firms and their advisors with a streamlined workflow for generating, analyzing, reviewing, approving, and processing fees, as well as sending invoices\u00A0—\u00A0all within the d1g1t product ecosystem.`,
+    description: (
+      <>
+        <p>I designed the user experience and interfaces for d1g1t's billing solution, <strong>providing wealth management firms and their advisors with a streamlined workflow</strong> for generating, analyzing, reviewing, approving, and processing fees, as well as sending invoices\u00A0—\u00A0all within the d1g1t product ecosystem.</p>
+      </>
+    ),
     company: "d1g1t Inc.",
     year: "2023",
     roles: ["Product Design", "Enterprise UX Design"],
