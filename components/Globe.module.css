@@ -1,0 +1,26 @@
+.frame {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+}
+
+.canvas {
+  --fade-point: 80%;
+  display: block;
+  width: 100%;
+  cursor: grab;
+  touch-action: none;
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, transparent var(--fade-point));
+  mask-image: linear-gradient(to bottom, black 0%, transparent var(--fade-point));
+}
+
+.calloutImg {
+  width: 180px;
+}
+
+@media (min-width: 768px) {
+  .canvas {
+    --fade-point: 80%;
+    margin-bottom: -80px;
+  }
+}

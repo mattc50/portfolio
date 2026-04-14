@@ -17,7 +17,7 @@
 .hero {
   max-width: var(--max-prose);
   padding-top: var(--space-8);
-  padding-bottom: var(--space-20);
+  /* padding-bottom: var(--space-20); */
   display: flex;
   flex-direction: column;
   justify-content: center;
