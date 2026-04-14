@@ -55,7 +55,7 @@ export function SandboxTile({ item, index, onClick }: SandboxTileProps) {
         onClick: handleClick,
         role: "button",
         tabIndex: 0,
-        ariaLabel: `View ${item.title}`,
+        ["aria-label"]: `View ${item.title}`,
         onKeyDown: (e) => e.key === "Enter" && handleClick()
       })}
     >

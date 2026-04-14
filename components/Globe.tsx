@@ -1,11 +1,14 @@
 "use client"
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import styles from "./Globe.module.css";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
 interface MassDefinition {
   label: string;
+  img: string;
+  desc: string;
   lng: number;
   lat: number;
   scale: number;
@@ -43,6 +46,8 @@ interface ProjectedDot {
 
 interface Callout {
   label: string;
+  img: string;
+  desc: string;
   lng: number;
   lat: number;
   x: number;
@@ -69,11 +74,13 @@ interface GlobeState {
   masses: Mass[];
   ready: boolean;
   rafId: number | null;
+  hoveredMassIdx: number;
+  activeMassIdx: number;
 }
 
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
 // Set to false to disable auto-spin entirely. The globe will only move on drag.
-const AUTO_SPIN = false;
+const AUTO_SPIN = true;
 
 // ─── STATIC MASS DEFINITIONS ──────────────────────────────────────────────────
 // Edit this list to place SVG illustrations on the globe.
@@ -83,8 +90,10 @@ const AUTO_SPIN = false;
 const MASS_DEFINITIONS: MassDefinition[] = [
   {
     label: "Soccer",
-    lng: 20,
-    lat: 40,
+    img: "/soccer.jpg",
+    desc: "I LOVE playing and watching soccer — you can catch me tuning into an Arsenal or FC Barcelona game!",
+    lng: 40,
+    lat: 60,
     scale: 0.6,
     boost: 2.0,
     svg: `<svg width="975" height="910" viewBox="0 0 975 910" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -94,6 +103,8 @@ const MASS_DEFINITIONS: MassDefinition[] = [
   },
   {
     label: "Psychology",
+    img: "/psychology.JPG",
+    desc: "I started college working towards a major in Psychology. The blend between psychology and creativity is what led me to product/UX!",
     lng: -100,
     lat: 20,
     scale: 0.5,
@@ -112,8 +123,11 @@ const MASS_DEFINITIONS: MassDefinition[] = [
   },
   {
     label: "Cinematography",
-    lng: -20,
-    lat: -60,
+    img: "/cinematography.png",
+    desc: "At one point, I wanted to do cinematography. I've made some YouTube videos, short films, and love to watch TV shows to this day (Breaking Bad and Pluribus to name a couple faves)!",
+
+    lng: -40,
+    lat: -40,
     scale: 0.4,
     boost: 2.0,
     svg: `<svg width="339" height="426" viewBox="0 0 339 426" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -123,7 +137,22 @@ const MASS_DEFINITIONS: MassDefinition[] = [
 `,
   },
   {
+    label: "Interiors",
+    img: "/interiors.JPG",
+    desc: "Alongside product/UX, my Human Centered Design studies encompassed interior design — Even winning 3rd place alongside 3 peers in an IIDA competition!",
+    lng: 60,
+    lat: -20,
+    scale: 0.5,
+    boost: 2.0,
+    svg: `<svg width="689" height="429" viewBox="0 0 689 429" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M113.139 0.319617C117.765 -0.177015 127.698 0.0524273 132.031 0.0559447L165.465 0.0959838L531.063 0.0744994C543.016 0.0637123 554.75 0.0755248 566.879 0.182898C582.92 0.0584229 598.786 6.14413 610.226 17.8665C619.097 26.9556 622.682 38.1796 624.098 49.4925C625.495 60.6505 624.825 72.5206 624.812 82.68C624.92 96.6345 624.778 110.59 624.395 124.538C630.256 124.648 636.136 124.601 642.105 124.587C649.389 124.57 656.777 124.608 664.174 125.076L664.704 125.114C670.216 125.544 677.162 127.35 681.771 131.955L681.772 131.956C688.169 138.35 688.527 146.076 688.527 152.933C688.527 199.518 688.497 246.122 688.513 292.699L688.527 337.788C688.53 346.222 688.629 353.522 688.133 359.499C687.638 365.465 686.517 370.778 683.634 375C680.638 379.39 676.125 382.06 670.036 383.535C664.067 384.982 656.298 385.354 646.311 385.005C641.091 384.823 635.022 384.819 629.315 384.768C629.316 385.609 629.318 386.474 629.323 387.358C629.336 389.668 629.356 392.113 629.322 394.545C629.255 399.362 628.981 404.435 627.94 408.799C624.964 421.274 614.598 425.963 604.344 427.653C594.265 429.313 582.517 428.354 575.178 428.353L532.06 428.338C528.561 428.345 525.056 428.344 521.542 428.309L518.024 428.261C510.855 428.137 505.134 426.47 500.722 423.366C496.293 420.251 493.546 415.943 491.884 411.199C489.131 403.34 489.201 393.727 489.631 385.006C467.761 385.627 441.858 385.01 420.555 385.008L275.079 384.997C251.007 384.996 225.346 384.528 201.367 385.044C201.423 390.422 201.461 395.443 201.163 399.908C200.792 405.452 199.882 410.631 197.544 415.019C192.562 424.369 182.262 428.248 164.708 428.356L114.449 428.342C105.693 428.327 93.3244 429.366 83.0669 427.247C77.7994 426.159 72.6619 424.183 68.5103 420.552C64.2903 416.861 61.3829 411.715 60.2027 404.856C59.139 398.671 59.3166 391.307 59.4693 385.056C57.0636 385.058 54.6504 385.081 52.2105 385.107C48.4216 385.146 44.5676 385.184 40.6656 385.13C36.0541 385.066 29.9878 385.338 24.396 384.679C18.6709 384.004 12.6366 382.302 7.80813 377.816C0.578701 371.097 0.229819 360.766 0.173369 353.601C0.049223 337.83 0.125173 322.033 0.140166 306.3L0.136259 175.613L0.12747 173.814C0.0574977 164.753 -0.365538 154.727 0.854033 145.274C1.47268 140.478 3.72885 135.37 7.27884 131.773C10.221 128.793 14.6346 127.133 19.0835 126.123C23.6521 125.086 28.8905 124.599 34.0669 124.393C42.1646 124.07 50.8398 124.43 56.8111 124.6L56.7701 89.6712V89.6692C56.7624 78.268 56.1761 65.6637 57.7202 53.762C59.2834 41.7139 63.0646 29.8892 72.0738 19.8284C83.4732 7.09828 96.5544 1.51627 113.139 0.319617ZM599.087 424.279C596.285 424.527 593.43 424.617 590.625 424.628C591.248 424.626 591.875 424.621 592.502 424.61C592.816 424.604 593.13 424.597 593.444 424.589C595.642 424.532 597.85 424.411 600.02 424.19L599.087 424.279ZM611.413 421.686C611.341 421.714 611.267 421.739 611.195 421.766C611.535 421.638 611.873 421.507 612.205 421.367L611.413 421.686ZM614.478 420.282C614.38 420.335 614.28 420.384 614.181 420.436C614.527 420.255 614.868 420.07 615.201 419.874L614.478 420.282ZM139.127 411.068C136.676 411.129 134.21 411.165 131.734 411.184C130.909 411.19 130.083 411.195 129.255 411.198C127.6 411.203 125.941 411.202 124.28 411.198C129.265 411.212 134.225 411.191 139.127 411.068ZM170.62 410.583C170.172 410.636 169.717 410.685 169.257 410.73C169.947 410.662 170.625 410.586 171.288 410.5L170.62 410.583ZM603.543 409.889C602.223 410.314 600.946 410.604 599.625 410.798C601.111 410.58 602.542 410.239 604.042 409.723L603.543 409.889ZM514.705 410.093C515.782 410.359 517.011 410.54 518.413 410.631C517.245 410.556 516.196 410.416 515.256 410.218C515.068 410.178 514.884 410.137 514.705 410.093ZM65.7144 409.815C65.7381 409.873 65.7636 409.931 65.7876 409.989C65.7006 409.779 65.6149 409.567 65.5327 409.351L65.7144 409.815ZM605.569 409.146C605.396 409.217 605.224 409.286 605.053 409.353C605.395 409.22 605.741 409.078 606.093 408.926L605.569 409.146ZM181.797 405.107C181.764 405.229 181.73 405.349 181.695 405.468C181.624 405.706 181.55 405.937 181.471 406.16C181.354 406.496 181.227 406.816 181.091 407.117C180.955 407.419 180.81 407.703 180.655 407.968C179.832 408.412 178.891 408.797 177.853 409.131L178.364 408.96C179.201 408.667 179.969 408.338 180.655 407.968C181.173 407.086 181.579 405.988 181.896 404.737C181.864 404.862 181.831 404.985 181.797 405.107ZM509.634 407.281C509.697 407.352 509.763 407.42 509.829 407.49C509.672 407.325 509.524 407.157 509.385 406.982L509.634 407.281ZM178.879 384.939C147.298 385.629 113.115 385.094 81.563 384.951C81.5441 385.293 81.5239 385.66 81.5064 386.05C81.4036 388.337 81.3422 391.151 81.3599 393.946C81.3777 396.755 81.4749 399.469 81.6773 401.582C81.7743 402.596 81.8888 403.39 82.0074 403.955C82.5787 404.277 83.3589 404.624 84.3687 404.966C85.8695 405.474 87.6428 405.894 89.5142 406.225C93.2737 406.89 97.0973 407.137 99.272 407.118C112.809 407.003 125.929 407.397 139.028 407.069C141.77 407 145.241 407.072 148.9 407.138C152.604 407.205 156.576 407.268 160.477 407.195C164.386 407.121 168.135 406.91 171.387 406.45C174.013 406.08 176.111 405.57 177.651 404.955C177.938 404.169 178.209 403.1 178.423 401.718C178.736 399.701 178.888 397.335 178.946 394.815C179.003 392.304 178.965 389.734 178.92 387.306C178.906 386.505 178.892 385.71 178.879 384.939ZM511.362 384.956C511.319 385.769 511.311 386.565 511.35 387.217L511.38 387.79C511.513 390.66 511.364 393.518 511.292 395.886C511.21 398.568 511.228 400.609 511.572 402.237C511.889 403.734 512.417 404.57 513.201 405.153C514.088 405.812 515.825 406.531 519.292 406.673C543.622 407.669 567.209 406.786 591.877 407.141C595.321 407.19 597.681 407.114 599.873 406.702C601.83 406.335 603.798 405.67 606.332 404.399C606.395 404.29 606.471 404.151 606.55 403.971C606.774 403.462 606.996 402.757 607.192 401.839C607.585 399.993 607.796 397.656 607.881 395.075C608 391.495 607.879 388.031 607.783 385.061L511.362 384.956ZM610.473 404.928C610.514 404.815 610.554 404.699 610.593 404.581C610.515 404.816 610.432 405.043 610.345 405.261L610.473 404.928ZM63.6909 400.739C63.7363 401.21 63.7873 401.677 63.8443 402.138C63.7588 401.446 63.6875 400.742 63.6275 400.029L63.6909 400.739ZM77.7681 382.023C77.7436 382.259 77.7191 382.52 77.6958 382.803L77.7486 382.208C77.7547 382.145 77.7618 382.083 77.7681 382.023ZM623.558 367.28C627.076 367.314 631.949 367.365 637.201 367.36C634.575 367.362 632.044 367.351 629.729 367.334C627.415 367.318 625.317 367.297 623.558 367.28ZM657.057 145.982C651.234 145.649 643.816 145.555 636.242 145.626C628.678 145.698 621.015 145.933 614.722 146.254C609.921 146.499 606.082 146.786 603.689 147.063C603.11 158.322 603.175 169.756 603.279 181.164C603.438 198.6 603.344 216.062 603.258 233.486C603.172 250.92 603.094 268.318 603.283 285.675L603.326 289.719L87.772 289.694L87.8433 196.687C87.8434 181.969 88.4501 161.465 87.4986 146.639C78.2121 145.608 68.2136 145.754 58.5503 145.806C50.9588 145.847 42.8159 145.596 35.607 145.886H35.604C29.8222 146.115 26.611 146.101 22.1802 147.19C21.3948 158.513 21.6647 170.336 21.6607 182.004L21.6568 313.437C21.6574 317.303 21.4342 329.196 21.5445 340.799C21.5993 346.571 21.7364 352.144 22.02 356.446C22.1625 358.606 22.3374 360.362 22.5396 361.628C22.5589 361.749 22.5784 361.863 22.5972 361.969C22.8416 362.023 23.1321 362.083 23.4732 362.143C24.8424 362.383 26.6351 362.587 28.772 362.756C33.0364 363.093 38.39 363.266 43.9019 363.342C54.9707 363.495 66.2113 363.261 70.3452 363.26L619.421 363.248L621.226 363.257C626.145 363.295 635.775 363.441 645.181 363.302C650.538 363.223 655.708 363.052 659.759 362.724C661.792 362.559 663.46 362.362 664.694 362.135C664.857 362.105 665.008 362.074 665.147 362.045C665.225 361.687 665.308 361.265 665.389 360.772C665.625 359.335 665.821 357.542 665.98 355.463C666.298 351.309 666.449 346.23 666.507 340.989C666.624 330.414 666.363 319.76 666.363 314.658L666.337 237.949C666.343 231.836 666.597 209.88 666.551 188.493C666.528 177.834 666.43 167.408 666.19 159.315C666.07 155.263 665.915 151.838 665.72 149.279C665.648 148.325 665.572 147.518 665.494 146.861C665.137 146.789 664.724 146.718 664.252 146.647C662.42 146.371 659.976 146.148 657.057 145.982ZM684.512 292.699C684.508 281.055 684.508 269.409 684.508 257.762L684.512 292.699ZM17.6597 182.004L17.6558 313.436C17.656 314.362 17.6427 315.814 17.6236 317.651L17.647 315.201C17.6528 314.493 17.6559 313.899 17.6558 313.436L17.6597 182.004ZM105.65 269.973C105.639 270.85 105.627 271.724 105.613 272.597L105.614 272.596C105.627 271.724 105.639 270.849 105.65 269.973ZM553.369 272.273C536.188 272.29 518.826 272.481 502.056 272.481C528.889 272.481 557.233 271.994 583.933 272.506C575.59 272.346 567.086 272.283 558.517 272.273C556.803 272.271 555.087 272.271 553.369 272.273ZM584.112 271.991C584.09 272.09 584.069 272.178 584.046 272.252L584.099 272.055C584.104 272.034 584.107 272.012 584.112 271.991ZM109.649 234.127C109.668 245.451 109.782 257.143 109.666 268.517C136.13 268.037 163.865 268.447 190.136 268.459L502.056 268.48C527.607 268.48 554.753 268.038 580.458 268.447C580.502 267.673 580.543 266.779 580.578 265.778C580.7 262.201 580.748 257.498 580.755 252.642C580.766 245.696 580.698 238.611 580.654 234.125L109.649 234.127ZM582.851 215.49C582.257 215.501 581.661 215.51 581.064 215.519C581.661 215.51 582.256 215.501 582.85 215.491L582.851 215.49ZM575.67 23.2376C560.931 21.9486 545.641 22.3427 530.419 22.3958L527.376 22.4016L126.719 22.3763C117.85 22.489 111.745 22.4715 106.124 23.9124C100.739 25.2927 95.6152 28.0872 89.2525 34.3401C85.3857 38.1403 81.8782 44.0093 80.6675 49.1536C77.8044 61.3165 78.7675 76.3815 78.7095 90.136C78.6606 101.728 78.5904 113.688 78.7183 125.241C84.2465 125.285 90.1769 125.473 95.1587 127.283C98.4197 128.468 101.428 130.376 103.816 133.411C106.182 136.42 107.749 140.293 108.549 145.116C110.22 155.182 109.734 165.252 109.715 174.731L109.714 174.741V174.752C109.624 187.006 109.651 199.261 109.79 211.515L555.793 211.555C564.042 211.543 572.445 211.635 580.626 211.524L580.607 174.276C580.601 171.789 580.528 169.239 580.456 166.616C580.383 164.014 580.311 161.342 580.314 158.706C580.319 153.47 580.614 148.099 581.9 143.228C583.201 138.3 585.569 133.683 589.844 130.231C593.344 127.405 597.84 125.588 603.441 124.815C603.306 110.483 603.279 96.1498 603.364 81.8177C603.37 76.1142 603.579 70.0069 603.49 63.6497C603.401 57.3672 603.014 51.4326 601.922 46.6604C600.903 42.2229 596.991 36.5231 591.58 31.6751C586.155 26.8155 580.139 23.6289 575.67 23.2376ZM105.738 171.079C105.726 172.292 105.717 173.506 105.714 174.723C105.677 179.822 105.66 184.921 105.663 190.02C105.661 186.62 105.668 183.221 105.684 179.822C105.692 178.122 105.702 176.422 105.714 174.723C105.717 173.506 105.727 172.291 105.739 171.078L105.738 171.079ZM35.4449 141.889C35.8999 141.871 36.3603 141.854 36.8238 141.84L35.4449 141.889ZM641.875 141.605C643.743 141.609 645.582 141.624 647.37 141.653L644.653 141.619C643.736 141.611 642.809 141.607 641.875 141.605ZM593.71 132.352C593.592 132.43 593.475 132.51 593.36 132.59C593.591 132.429 593.828 132.272 594.071 132.119L593.71 132.352ZM598.638 129.991C598.326 130.095 598.021 130.204 597.722 130.318L598.175 130.152C598.328 130.097 598.482 130.043 598.638 129.991ZM88.9634 129.853C89.3412 129.911 89.7151 129.975 90.0845 130.045C89.8997 130.01 89.7148 129.977 89.5279 129.945C89.154 129.88 88.776 129.823 88.3941 129.77L88.9634 129.853ZM663.92 129.068C664.244 129.088 664.573 129.114 664.903 129.145L663.92 129.068C663.467 129.039 663.014 129.012 662.56 128.987L663.92 129.068ZM59.6548 128.67C60.0592 128.676 60.4466 128.68 60.8159 128.681L60.815 128.68C60.4459 128.679 60.0588 128.676 59.6548 128.67ZM636.655 128.605C635.745 128.608 634.835 128.609 633.925 128.61C636.655 128.607 639.385 128.594 642.114 128.587L636.655 128.605ZM623.01 128.514C625.733 128.576 628.458 128.6 631.182 128.608C627.548 128.598 623.914 128.557 620.283 128.438L623.01 128.514ZM620.89 60.2561C621.135 67.8402 620.82 75.4718 620.811 82.6741C620.813 81.3645 620.825 80.0405 620.841 78.7054C620.858 77.3704 620.88 76.024 620.901 74.6692C620.943 71.9597 620.984 69.2164 620.983 66.4622C620.983 65.7736 620.98 65.0844 620.973 64.3948C620.96 63.0156 620.935 61.6351 620.89 60.2561ZM76.773 48.2366C76.6792 48.6349 76.5896 49.0366 76.5034 49.4407L76.773 48.2366ZM619.692 46.9602C619.802 47.6295 619.903 48.3015 619.996 48.9759L619.85 47.9661C619.8 47.6302 619.747 47.2949 619.692 46.9602ZM81.1646 38.1429C81.0955 38.253 81.0276 38.364 80.9595 38.4749C81.1378 38.1846 81.3194 37.8966 81.5044 37.6116L81.1646 38.1429ZM604.795 18.2015C605.667 18.9814 606.515 19.7926 607.338 20.635C606.349 19.6222 605.323 18.6542 604.264 17.7317L604.795 18.2015ZM109.9 19.1224C109.286 19.2055 108.68 19.2991 108.081 19.4046C108.28 19.3694 108.482 19.3356 108.683 19.303C109.086 19.2379 109.491 19.1778 109.9 19.1224ZM591.964 9.68583C592.733 10.0513 593.493 10.4343 594.244 10.8352C593.904 10.6539 593.563 10.4752 593.219 10.3011C593.011 10.1956 592.802 10.0923 592.593 9.98954C592.175 9.78411 591.755 9.58371 591.332 9.38895L591.964 9.68583ZM118.731 4.03446C118.568 4.03764 118.407 4.04248 118.247 4.04618C118.813 4.03308 119.398 4.02198 119.994 4.01493L118.731 4.03446Z" fill="black"/>
+</svg>
+`,
+  },
+  {
     label: "Saxophone",
+    img: "/saxophone.JPG",
+    desc: "I played saxophone for 7 years throughout middle and high school. I hope to get back to it!",
     lng: 160,
     lat: -5,
     scale: 0.5,
@@ -243,10 +272,12 @@ function classifyDots(fibPts: [number, number, number][], masses: Mass[]): DotDa
 
 const DOT_COUNT = 11000;
 const MASS_DOT_SCALE = 0.65; // ← 1.0 = original, smaller = tinier
-
+const AUTO_SPIN_SPEED = 0.0015;        // radians per frame
+const AUTO_SPIN_RESUME_DELAY = 5000;   // ms after drag release before spin resumes
 
 export default function Globe() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const stateRef = useRef<GlobeState>({
     W: 0, H: 0, R: 0,
@@ -255,15 +286,32 @@ export default function Globe() {
     dragging: false, didDrag: false,
     lastX: 0, lastY: 0, lastT: 0,
     pvX: 0, pvY: 0,
-    autoSpin: AUTO_SPIN,
+    autoSpin: true,
     dotData: [],
     masses: [],
     ready: false,
     rafId: null,
+    hoveredMassIdx: -1,
+    activeMassIdx: -1,
   });
 
   const [callout, setCallout] = useState<Callout | null>(null);
+  const [calloutVisible, setCalloutVisible] = useState(false);
   const calloutRef = useRef<Callout | null>(null); // mirrors callout for use inside RAF
+
+  const calloutHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showCallout = useCallback((c: Callout) => {
+    if (calloutHideTimer.current) clearTimeout(calloutHideTimer.current);
+    setCallout(c);
+    // Defer to next frame so the element is mounted before opacity transitions
+    requestAnimationFrame(() => setCalloutVisible(true));
+  }, []);
+
+  const hideCallout = useCallback(() => {
+    setCalloutVisible(false);
+    calloutHideTimer.current = setTimeout(() => setCallout(null), 200); // match transition duration
+  }, []);
 
   // ── Rotation helpers (read/write stateRef) ──
   const rotPt = useCallback(([x, y, z]: [number, number, number]): [number, number, number] => {
@@ -304,9 +352,14 @@ export default function Globe() {
       const t = (z + 1) / 2;
       const front = z >= 0;
       const isMass = massIdx >= 0;
-      const boost = isMass ? (masses[massIdx]?.boost ?? 1.8) : 1.0;
+      // const boost = isMass ? (masses[massIdx]?.boost ?? 1.8) : 1.0;
 
       const BASE = { r: 109, g: 105, b: 98 }; // ← change this one line
+
+      const isHovered = massIdx >= 0 && massIdx === stateRef.current.hoveredMassIdx;
+      const isActive = massIdx >= 0 && massIdx === stateRef.current.activeMassIdx;
+      const boost = isMass ? (masses[massIdx]?.boost ?? 1.8) : 1.0;
+      const darken = isHovered || isActive ? 0.5 : 0; // additive alpha boost
 
       ctx.beginPath();
       if (isMass) {
@@ -315,10 +368,10 @@ export default function Globe() {
         const mb = Math.min(255, BASE.b + 20);
         if (!front) {
           ctx.arc(sx, sy, (1.0 + t * 0.8) * boost * 0.4 * MASS_DOT_SCALE, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(${mr},${mg},${mb},${t * 0.18})`;
+          ctx.fillStyle = `rgba(${mr},${mg},${mb},${t * 0.18 + darken})`;
         } else {
           ctx.arc(sx, sy, (1.2 + t * 1.4) * boost * 0.65 * MASS_DOT_SCALE, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(${mr},${mg},${mb},${0.55 + t * 0.18})`;
+          ctx.fillStyle = `rgba(${mr},${mg},${mb},${0.55 + t * 0.18 + darken})`;
         }
       } else {
         if (!front) {
@@ -340,11 +393,9 @@ export default function Globe() {
       if (!s.dragging) {
         s.rotY += s.velY; s.rotX += s.velX;
         s.velX *= 0.95;
-        if (s.autoSpin) {
-          s.velY = s.velY * 0.96 + 0.001 * (1 - Math.abs(s.velY) / 0.05);
-        } else {
-          s.velY *= 0.95;
-        }
+        s.velX *= 0.95;
+        s.velY *= 0.95;
+        if (s.autoSpin) s.rotY += AUTO_SPIN_SPEED;
         s.rotX = Math.max(-1.2, Math.min(1.2, s.rotX));
       }
       if (s.ready) draw();
@@ -364,12 +415,12 @@ export default function Globe() {
     const onResize = () => {
       const s = stateRef.current;
       s.W = canvas.offsetWidth;
-      s.H = Math.min(s.W, 480);
+      s.H = Math.min(s.W, 720);
       canvas.width = s.W * devicePixelRatio;
       canvas.height = s.H * devicePixelRatio;
       canvas.style.height = s.H + "px";
       canvas.getContext("2d")!.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
-      s.R = Math.min(s.W, s.H) * 0.6;
+      s.R = Math.min(s.W, s.H) * 0.44;
     };
     onResize();
     window.addEventListener("resize", onResize);
@@ -394,11 +445,15 @@ export default function Globe() {
 
     const pDown = (e: MouseEvent | TouchEvent) => {
       const s = stateRef.current;
+      s.autoSpin = false;
+      if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
       s.dragging = true; s.didDrag = false;
       canvas.style.cursor = "grabbing";
       const t = (e as TouchEvent).touches ? (e as TouchEvent).touches[0] : (e as MouseEvent);
       s.lastX = t.clientX; s.lastY = t.clientY;
       s.lastT = Date.now(); s.pvX = 0; s.pvY = 0;
+      s.activeMassIdx = -1;
+      hideCallout();
     };
 
     const pMove = (e: MouseEvent | TouchEvent) => {
@@ -423,6 +478,9 @@ export default function Globe() {
         s.velX = s.pvX * 0.096;
         s.velY = s.pvY * 0.096;
       }
+      resumeTimerRef.current = setTimeout(() => {
+        stateRef.current.autoSpin = true;
+      }, AUTO_SPIN_RESUME_DELAY);
     };
 
     canvas.addEventListener("mousedown", pDown);
@@ -443,67 +501,170 @@ export default function Globe() {
   }, []);
 
   // ── Hover / callout ──
+  // useEffect(() => {
+  //   const canvas = canvasRef.current!;
+
+  //   const onMove = (e: MouseEvent) => {
+  //     const s = stateRef.current;
+  //     if (s.dragging) { setCallout(null); return; }
+
+  //     const rect = canvas.getBoundingClientRect();
+  //     const cx = s.W / 2, cy = s.H / 2;
+  //     const mx = (e.clientX - rect.left) * (s.W / rect.width);
+  //     const my = (e.clientY - rect.top) * (s.H / rect.height);
+  //     const dx = (mx - cx) / s.R;
+  //     const dy = (cy - my) / s.R;
+  //     const r2 = dx * dx + dy * dy;
+
+  //     if (r2 > 1) { setCallout(null); return; }
+
+  //     const dz = Math.sqrt(1 - r2);
+  //     const worldPt = unrotPt([dx, dy, dz]);
+
+  //     let hitIdx = -1;
+  //     for (let i = 0; i < s.masses.length; i++) {
+  //       const m = s.masses[i];
+  //       if (!m.imgData) continue;
+  //       const uv = projectOntoTangentPlane(worldPt, m);
+  //       if (uv && inBoundsAt(m, uv[0], uv[1])) { hitIdx = i; break; }
+  //     }
+
+  //     if (hitIdx >= 0) {
+  //       canvas.style.cursor = "default";
+  //       const m = s.masses[hitIdx];
+  //       const wrapRect = wrapRef.current!.getBoundingClientRect();
+  //       setCallout({
+  //         label: m.label,
+  //         img: m.img,
+  //         desc: m.desc,
+  //         lng: m.lng,
+  //         lat: m.lat,
+  //         x: e.clientX - wrapRect.left,
+  //         y: e.clientY - wrapRect.top,
+  //       });
+  //     } else {
+  //       canvas.style.cursor = "grab";
+  //       setCallout(null);
+  //     }
+  //   };
+
+  //   const onLeave = () => setCallout(null);
+
+  //   canvas.addEventListener("mousemove", onMove);
+  //   canvas.addEventListener("mouseleave", onLeave);
+  //   return () => {
+  //     canvas.removeEventListener("mousemove", onMove);
+  //     canvas.removeEventListener("mouseleave", onLeave);
+  //   };
+  // }, [unrotPt]);
   useEffect(() => {
     const canvas = canvasRef.current!;
 
-    const onMove = (e: MouseEvent) => {
+    const getHitMassIdx = (clientX: number, clientY: number): number => {
       const s = stateRef.current;
-      if (s.dragging) { setCallout(null); return; }
-
       const rect = canvas.getBoundingClientRect();
       const cx = s.W / 2, cy = s.H / 2;
-      const mx = (e.clientX - rect.left) * (s.W / rect.width);
-      const my = (e.clientY - rect.top) * (s.H / rect.height);
+      const mx = (clientX - rect.left) * (s.W / rect.width);
+      const my = (clientY - rect.top) * (s.H / rect.height);
       const dx = (mx - cx) / s.R;
       const dy = (cy - my) / s.R;
-      const r2 = dx * dx + dy * dy;
-
-      if (r2 > 1) { setCallout(null); return; }
-
-      const dz = Math.sqrt(1 - r2);
+      if (dx * dx + dy * dy > 1) return -1;
+      const dz = Math.sqrt(1 - dx * dx - dy * dy);
       const worldPt = unrotPt([dx, dy, dz]);
-
-      let hitIdx = -1;
       for (let i = 0; i < s.masses.length; i++) {
-        const m = s.masses[i];
-        if (!m.imgData) continue;
-        const uv = projectOntoTangentPlane(worldPt, m);
-        if (uv && inBoundsAt(m, uv[0], uv[1])) { hitIdx = i; break; }
+        const uv = projectOntoTangentPlane(worldPt, s.masses[i]);
+        if (uv && inBoundsAt(s.masses[i], uv[0], uv[1])) return i;
       }
+      return -1;
+    };
 
-      if (hitIdx >= 0) {
-        canvas.style.cursor = "default";
-        const m = s.masses[hitIdx];
-        const wrapRect = wrapRef.current!.getBoundingClientRect();
-        setCallout({
-          label: m.label,
-          lng: m.lng,
-          lat: m.lat,
-          x: e.clientX - wrapRect.left,
-          y: e.clientY - wrapRect.top,
-        });
+    const buildCallout = (clientX: number, clientY: number, massIdx: number): Callout => {
+      const m = stateRef.current.masses[massIdx];
+      const wrapRect = wrapRef.current!.getBoundingClientRect();
+      return { label: m.label, lng: m.lng, img: m.img, desc: m.desc, lat: m.lat, x: clientX - wrapRect.left, y: clientY - wrapRect.top };
+    };
+
+    const onMouseMove = (e: MouseEvent) => {
+      const s = stateRef.current;
+      if (s.dragging) { s.hoveredMassIdx = -1; return; }
+      const idx = getHitMassIdx(e.clientX, e.clientY);
+      s.hoveredMassIdx = idx;
+      canvas.style.cursor = idx >= 0 ? "pointer" : "grab";
+    };
+
+    const onMouseLeave = () => {
+      stateRef.current.hoveredMassIdx = -1;
+      setCallout(null);
+    };
+
+    const onMouseClick = (e: MouseEvent) => {
+      const s = stateRef.current;
+      if (s.didDrag) return;
+      const idx = getHitMassIdx(e.clientX, e.clientY);
+      if (idx >= 0) {
+        if (idx === s.activeMassIdx) {
+          s.activeMassIdx = -1;
+          hideCallout();
+        } else {
+          s.activeMassIdx = idx;
+          showCallout(buildCallout(e.clientX, e.clientY, idx));
+        }
       } else {
-        canvas.style.cursor = "grab";
-        setCallout(null);
+        s.activeMassIdx = -1;
+        hideCallout();
       }
     };
 
-    const onLeave = () => setCallout(null);
+    // Touch tap: fire if touchend is close in time and position to touchstart
+    let touchStartX = 0, touchStartY = 0, touchStartT = 0;
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      touchStartT = Date.now();
+    };
+    const onTouchEnd = (e: TouchEvent) => {
+      const s = stateRef.current;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - touchStartX, dy = t.clientY - touchStartY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const elapsed = Date.now() - touchStartT;
+      if (dist < 8 && elapsed < 300) {
+        const idx = getHitMassIdx(t.clientX, t.clientY);
+        if (idx >= 0) {
+          if (idx === s.activeMassIdx) {
+            s.activeMassIdx = -1;
+            hideCallout();
+          } else {
+            s.activeMassIdx = idx;
+            showCallout(buildCallout(t.clientX, t.clientY, idx));
+          }
+        } else {
+          s.activeMassIdx = -1;
+          hideCallout();
+        }
+      }
+    };
 
-    canvas.addEventListener("mousemove", onMove);
-    canvas.addEventListener("mouseleave", onLeave);
+    canvas.addEventListener("mousemove", onMouseMove);
+    canvas.addEventListener("mouseleave", onMouseLeave);
+    canvas.addEventListener("click", onMouseClick);
+    canvas.addEventListener("touchstart", onTouchStart, { passive: true });
+    canvas.addEventListener("touchend", onTouchEnd);
     return () => {
-      canvas.removeEventListener("mousemove", onMove);
-      canvas.removeEventListener("mouseleave", onLeave);
+      canvas.removeEventListener("mousemove", onMouseMove);
+      canvas.removeEventListener("mouseleave", onMouseLeave);
+      canvas.removeEventListener("click", onMouseClick);
+      canvas.removeEventListener("touchstart", onTouchStart);
+      canvas.removeEventListener("touchend", onTouchEnd);
     };
   }, [unrotPt]);
 
   // ── Render ──
   return (
-    <div ref={wrapRef} style={{ position: "relative", display: "inline-block", width: "100%" }}>
+    <div ref={wrapRef} className={styles.frame}>
       <canvas
         ref={canvasRef}
-        style={{ display: "block", width: "100%", cursor: "grab", touchAction: "none" }}
+        className={styles.canvas}
       />
 
       {/* Callout tooltip */}
@@ -516,24 +677,29 @@ export default function Globe() {
             transform: "translate(-50%, calc(-100% - 12px))",
             pointerEvents: "none",
             zIndex: 10,
+            opacity: calloutVisible ? 1 : 0,
+            transition: "opacity 0.2s ease",
           }}
         >
           <div style={{
+            width: "202px",
             background: "var(--color-background-primary, #fff)",
             border: "0.5px solid var(--color-border-tertiary, #ddd)",
             borderRadius: "var(--border-radius-md, 6px)",
-            padding: "7px 11px",
+            padding: "11px",
             fontSize: 12,
             color: "var(--color-text-primary, #111)",
-            whiteSpace: "nowrap",
+            // whiteSpace: "nowrap",
             boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
             display: "flex",
             flexDirection: "column",
-            gap: 2,
+            gap: 12,
           }}>
-            <span style={{ fontWeight: 500 }}>{callout.label}</span>
-            <span style={{ fontSize: 10.5, color: "var(--color-text-secondary, #666)" }}>
-              {callout.lng}° lng, {callout.lat}° lat
+            <img src={callout.img} className={styles.calloutImg} />
+            {/* <span style={{ fontWeight: 500 }}>{callout.label}</span> */}
+            <span style={{ fontSize: 12, color: "var(--color-text-secondary, #666)" }}>
+              {/* {callout.lng}° lng, {callout.lat}° lat */}
+              {callout.desc}
             </span>
           </div>
           {/* Arrow */}
