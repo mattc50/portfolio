@@ -4,6 +4,7 @@ import { ProjectCard } from "@/components/ProjectCard";
 import { Footer } from "@/components/Footer";
 import { Lct } from "@/components/icons/Lct";
 import { Esb } from "@/components/icons/Esb";
+import Globe from "@/components/Globe";
 
 export default function Home() {
   const projects = getPublishedProjects();
@@ -41,6 +42,8 @@ export default function Home() {
               </span>).
             </p>
           </div>
+
+          <Globe />
 
           <div className={styles.grid}>
             {projects.map((project, i) => (
