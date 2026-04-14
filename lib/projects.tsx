@@ -8,6 +8,7 @@ import { ReactNode } from "react";
 export type ProjectRole =
   | "Product Design"
   | "Design Engineering"
+  | "UX Research"
   | "UX Design"
   | "Enterprise UX Design"
   | "Design Systems"
@@ -61,7 +62,7 @@ export const projects: Project[] = [
     ),
     company: "iSonic.ai",
     year: "2025",
-    roles: ["Product Design", "Design Systems", "Frontend Engineering"],
+    roles: ["UX Research", "Product Design", "Design Systems", "Frontend Engineering"],
     figmaUrl: "https://www.figma.com/deck/pjQmKuFEGApisZcb6ifY6s",
     coverImage: "/unified-inbox.png",
     published: true,
@@ -77,7 +78,7 @@ export const projects: Project[] = [
     ),
     company: "Lenz",
     year: "2024",
-    roles: ["Product Design", "UX Design", "Frontend Engineering"],
+    roles: ["Product Design", "Frontend Engineering"],
     figmaUrl: "https://www.figma.com/deck/8DOz3LMYE6CI7Rhh4wpSzm",
     coverImage: "/lenz.png",
     published: true,
@@ -93,7 +94,7 @@ export const projects: Project[] = [
     ),
     company: "Case Study",
     year: "2023",
-    roles: ["Product Design", "UX Design"],
+    roles: ["UX Research", "Product Design"],
     figmaUrl: "https://www.figma.com/deck/QUiqv1VXvKBCQmyWdqrwjB",
     coverImage: "/venmo-split.png",
     published: true,
