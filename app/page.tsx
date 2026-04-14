@@ -43,7 +43,7 @@ export default function Home() {
             </p>
           </div>
 
-          <Globe />
+          {/* <Globe /> */}
 
           <div className={styles.grid}>
             {projects.map((project, i) => (
