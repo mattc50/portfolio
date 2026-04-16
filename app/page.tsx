@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { Lct } from "@/components/icons/Lct";
 import { Esb } from "@/components/icons/Esb";
 import Globe from "@/components/Globe";
+import Globe2 from "@/components/Globe2";
 
 export default function Home() {
   const projects = getPublishedProjects();
@@ -44,6 +45,7 @@ export default function Home() {
           </div>
 
           <Globe />
+          <Globe2 />
 
           <div className={styles.grid}>
             {projects.map((project, i) => (
