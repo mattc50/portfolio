@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import styles from "./Globe.module.css";
-import useScreenWidth from "@/hooks/useScreenWidth";
+// import useScreenWidth from "@/hooks/useScreenWidth";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
@@ -272,7 +272,7 @@ function classifyDots(fibPts: [number, number, number][], masses: Mass[]): DotDa
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
 
 const DOT_COUNT = 11000;
-const MASS_DOT_SCALE = 0.65; // ← 1.0 = original, smaller = tinier
+// const MASS_DOT_SCALE = 0.65; // ← 1.0 = original, smaller = tinier
 const AUTO_SPIN_SPEED = 0.0015;        // radians per frame
 const AUTO_SPIN_RESUME_DELAY = 5000;   // ms after drag release before spin resumes
 
@@ -305,7 +305,7 @@ export default function Globe() {
 
   const calloutHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const screenWidth = useScreenWidth();
+  // const screenWidth = useScreenWidth();
 
   // const showCallout = useCallback((c: Callout) => {
   //   if (calloutHideTimer.current) clearTimeout(calloutHideTimer.current);
@@ -354,6 +354,8 @@ export default function Globe() {
     if (!canvas) return;
     const ctx = canvas.getContext("2d")!;
     const { W, H, R, dotData, masses } = stateRef.current;
+    const MASS_DOT_SCALE = Math.max(0.45, Math.min(0.65, W / 1000));
+
     const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const cx = W / 2, cy = H / 2;
 
@@ -385,10 +387,10 @@ export default function Globe() {
         const mg = Math.min(255, BASE.g + 20);
         const mb = Math.min(255, BASE.b + 20);
         if (!front) {
-          ctx.arc(sx, sy, (1.0 + t * 0.8) * boost * 0.4 * (screenWidth >= 768 ? 0.65 : 0.5), 0, Math.PI * 2);
+          ctx.arc(sx, sy, (1.0 + t * 0.8) * boost * 0.4 * MASS_DOT_SCALE, 0, Math.PI * 2);
           ctx.fillStyle = `rgba(${mr},${mg},${mb},${t * 0.18 + darken})`;
         } else {
-          ctx.arc(sx, sy, (1.2 + t * 1.4) * boost * 0.65 * (screenWidth >= 768 ? 0.65 : 0.5), 0, Math.PI * 2);
+          ctx.arc(sx, sy, (1.2 + t * 1.4) * boost * 0.65 * MASS_DOT_SCALE, 0, Math.PI * 2);
           ctx.fillStyle = `rgba(${mr},${mg},${mb},${0.55 + t * 0.18 + darken})`;
         }
       } else {
