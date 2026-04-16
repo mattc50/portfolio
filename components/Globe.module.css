@@ -15,7 +15,20 @@
 }
 
 .calloutImg {
-  width: 180px;
+  /* width: 180px; */
+  width: 100px;
+  object-fit: cover;
+}
+
+.calloutArrow {
+  display: none;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid var(--color-border-tertiary, #ddd);
+  margin: 0 auto;
+  position: relative;
 }
 
 @media (min-width: 768px) {
@@ -23,4 +36,8 @@
     --fade-point: 80%;
     margin-bottom: -80px;
   }
+
+  /* .calloutArrow {
+    display: block;
+  } */
 }

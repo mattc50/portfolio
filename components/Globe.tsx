@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import styles from "./Globe.module.css";
+import useScreenWidth from "@/hooks/useScreenWidth";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
@@ -298,18 +299,35 @@ export default function Globe() {
   const [callout, setCallout] = useState<Callout | null>(null);
   const [calloutVisible, setCalloutVisible] = useState(false);
   const calloutRef = useRef<Callout | null>(null); // mirrors callout for use inside RAF
+  const calloutVisibleRef = useRef(false);
+  const calloutElemRef = useRef<HTMLDivElement>(null);
+  const suppressNextClick = useRef(false);
 
   const calloutHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const screenWidth = useScreenWidth();
+
+  // const showCallout = useCallback((c: Callout) => {
+  //   if (calloutHideTimer.current) clearTimeout(calloutHideTimer.current);
+  //   setCallout(c);
+  //   // Defer to next frame so the element is mounted before opacity transitions
+  //   requestAnimationFrame(() => {
+  //     setCalloutVisible(true);
+  //     calloutVisibleRef.current = true;
+  //   })
+  // }, []);
   const showCallout = useCallback((c: Callout) => {
     if (calloutHideTimer.current) clearTimeout(calloutHideTimer.current);
+    setCalloutVisible(false);          // ensure hidden while repositioning
+    calloutVisibleRef.current = false;
     setCallout(c);
-    // Defer to next frame so the element is mounted before opacity transitions
-    requestAnimationFrame(() => setCalloutVisible(true));
+    // visibility is set after the clamp useEffect runs — see below
   }, []);
 
   const hideCallout = useCallback(() => {
     setCalloutVisible(false);
+    calloutVisibleRef.current = false;
+    // stateRef.current.autoSpin = true;
     calloutHideTimer.current = setTimeout(() => setCallout(null), 200); // match transition duration
   }, []);
 
@@ -367,10 +385,10 @@ export default function Globe() {
         const mg = Math.min(255, BASE.g + 20);
         const mb = Math.min(255, BASE.b + 20);
         if (!front) {
-          ctx.arc(sx, sy, (1.0 + t * 0.8) * boost * 0.4 * MASS_DOT_SCALE, 0, Math.PI * 2);
+          ctx.arc(sx, sy, (1.0 + t * 0.8) * boost * 0.4 * (screenWidth >= 768 ? 0.65 : 0.5), 0, Math.PI * 2);
           ctx.fillStyle = `rgba(${mr},${mg},${mb},${t * 0.18 + darken})`;
         } else {
-          ctx.arc(sx, sy, (1.2 + t * 1.4) * boost * 0.65 * MASS_DOT_SCALE, 0, Math.PI * 2);
+          ctx.arc(sx, sy, (1.2 + t * 1.4) * boost * 0.65 * (screenWidth >= 768 ? 0.65 : 0.5), 0, Math.PI * 2);
           ctx.fillStyle = `rgba(${mr},${mg},${mb},${0.55 + t * 0.18 + darken})`;
         }
       } else {
@@ -452,8 +470,8 @@ export default function Globe() {
       const t = (e as TouchEvent).touches ? (e as TouchEvent).touches[0] : (e as MouseEvent);
       s.lastX = t.clientX; s.lastY = t.clientY;
       s.lastT = Date.now(); s.pvX = 0; s.pvY = 0;
-      s.activeMassIdx = -1;
-      hideCallout();
+      // s.activeMassIdx = -1;
+      // hideCallout();
     };
 
     const pMove = (e: MouseEvent | TouchEvent) => {
@@ -477,9 +495,13 @@ export default function Globe() {
       if (s.didDrag) {
         s.velX = s.pvX * 0.096;
         s.velY = s.pvY * 0.096;
+        s.activeMassIdx = -1;
+        hideCallout();
       }
       resumeTimerRef.current = setTimeout(() => {
+        // if (stateRef.current.activeMassIdx === -1) {
         stateRef.current.autoSpin = true;
+        // }
       }, AUTO_SPIN_RESUME_DELAY);
     };
 
@@ -578,10 +600,31 @@ export default function Globe() {
       return -1;
     };
 
-    const buildCallout = (clientX: number, clientY: number, massIdx: number): Callout => {
-      const m = stateRef.current.masses[massIdx];
+    const buildCallout = (massIdx: number): Callout => {
+      const s = stateRef.current;
+      const m = s.masses[massIdx];
       const wrapRect = wrapRef.current!.getBoundingClientRect();
-      return { label: m.label, lng: m.lng, img: m.img, desc: m.desc, lat: m.lat, x: clientX - wrapRect.left, y: clientY - wrapRect.top };
+      const canvasRect = canvasRef.current!.getBoundingClientRect();
+
+      // Project the mass center onto screen space
+      const [rx, ry, rz] = rotPt(m.centerXYZ);
+      const cx = s.W / 2, cy = s.H / 2;
+      const sx = cx + rx * s.R;
+      const sy = cy - ry * s.R;
+
+      // Scale from canvas logical pixels to actual screen pixels
+      const scaleX = canvasRect.width / s.W;
+      const scaleY = canvasRect.height / s.H;
+
+      return {
+        label: m.label,
+        img: m.img,
+        desc: m.desc,
+        lng: m.lng,
+        lat: m.lat,
+        x: canvasRect.left - wrapRect.left + sx * scaleX,
+        y: canvasRect.top - wrapRect.top + sy * scaleY,
+      };
     };
 
     const onMouseMove = (e: MouseEvent) => {
@@ -594,20 +637,26 @@ export default function Globe() {
 
     const onMouseLeave = () => {
       stateRef.current.hoveredMassIdx = -1;
-      setCallout(null);
+      // hideCallout();
     };
 
     const onMouseClick = (e: MouseEvent) => {
+      if (suppressNextClick.current) { // ← add this guard
+        suppressNextClick.current = false;
+        return;
+      }
       const s = stateRef.current;
       if (s.didDrag) return;
       const idx = getHitMassIdx(e.clientX, e.clientY);
       if (idx >= 0) {
-        if (idx === s.activeMassIdx) {
+        // console.log(idx, s.activeMassIdx, calloutVisibleRef.current)
+
+        if (idx === s.activeMassIdx && calloutVisibleRef.current) {
           s.activeMassIdx = -1;
           hideCallout();
         } else {
           s.activeMassIdx = idx;
-          showCallout(buildCallout(e.clientX, e.clientY, idx));
+          showCallout(buildCallout(idx));
         }
       } else {
         s.activeMassIdx = -1;
@@ -628,20 +677,22 @@ export default function Globe() {
       const dx = t.clientX - touchStartX, dy = t.clientY - touchStartY;
       const dist = Math.sqrt(dx * dx + dy * dy);
       const elapsed = Date.now() - touchStartT;
-      if (dist < 8 && elapsed < 300) {
-        const idx = getHitMassIdx(t.clientX, t.clientY);
-        if (idx >= 0) {
-          if (idx === s.activeMassIdx) {
-            s.activeMassIdx = -1;
-            hideCallout();
-          } else {
-            s.activeMassIdx = idx;
-            showCallout(buildCallout(t.clientX, t.clientY, idx));
-          }
-        } else {
+      if (dist >= 8 || elapsed >= 300) return;
+
+      suppressNextClick.current = true; // ← add this
+      // if (dist < 8 && elapsed < 300) {
+      const idx = getHitMassIdx(t.clientX, t.clientY);
+      if (idx >= 0) {
+        if (idx === s.activeMassIdx && calloutVisibleRef.current) {
           s.activeMassIdx = -1;
           hideCallout();
+        } else {
+          s.activeMassIdx = idx;
+          showCallout(buildCallout(idx));
         }
+      } else {
+        s.activeMassIdx = -1;
+        hideCallout();
       }
     };
 
@@ -659,6 +710,36 @@ export default function Globe() {
     };
   }, [unrotPt]);
 
+  useEffect(() => {
+    if (!callout || !calloutElemRef.current || !wrapRef.current) return;
+    const el = calloutElemRef.current;
+    const wrap = wrapRef.current.getBoundingClientRect();
+    const elW = el.offsetWidth;
+    const elH = el.offsetHeight;
+    const MARGIN = 8;
+
+    // The callout is centered horizontally on x, and sits above y
+    let x = callout.x;
+    let y = callout.y;
+
+    // Clamp horizontal: left edge and right edge
+    x = Math.max(elW / 2 + MARGIN, Math.min(wrap.width - elW / 2 - MARGIN, x));
+
+    // Clamp vertical: if it would go above the wrap, flip below the pointer
+    if (y - elH - 12 < MARGIN) {
+      y = callout.y + elH + 24; // flip below
+    }
+
+    if (x !== callout.x || y !== callout.y) {
+      setCallout(c => c ? { ...c, x, y } : c);
+    }
+
+    requestAnimationFrame(() => {
+      setCalloutVisible(true);
+      calloutVisibleRef.current = true;
+    });
+  }, [callout?.label]); // re-run when a new mass is selected
+
   // ── Render ──
   return (
     <div ref={wrapRef} className={styles.frame}>
@@ -670,6 +751,7 @@ export default function Globe() {
       {/* Callout tooltip */}
       {callout && (
         <div
+          ref={calloutElemRef}
           style={{
             position: "absolute",
             left: callout.x,
@@ -682,7 +764,7 @@ export default function Globe() {
           }}
         >
           <div style={{
-            width: "202px",
+            width: "280px",
             background: "var(--color-background-primary, #fff)",
             border: "0.5px solid var(--color-border-tertiary, #ddd)",
             borderRadius: "var(--border-radius-md, 6px)",
@@ -692,7 +774,7 @@ export default function Globe() {
             // whiteSpace: "nowrap",
             boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
             display: "flex",
-            flexDirection: "column",
+            // flexDirection: "column",
             gap: 12,
           }}>
             <img src={callout.img} className={styles.calloutImg} />
@@ -703,14 +785,7 @@ export default function Globe() {
             </span>
           </div>
           {/* Arrow */}
-          <div style={{
-            width: 0, height: 0,
-            borderLeft: "6px solid transparent",
-            borderRight: "6px solid transparent",
-            borderTop: "6px solid var(--color-border-tertiary, #ddd)",
-            margin: "0 auto",
-            position: "relative",
-          }}>
+          <div className={styles.calloutArrow}>
             <div style={{
               position: "absolute",
               top: -7, left: -5,
