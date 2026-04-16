@@ -105,7 +105,7 @@ export const projects: Project[] = [
     tagline: "Powering how advisory firms manage fees at scale.",
     description: (
       <>
-        <p>I designed the user experience and interfaces for d1g1t's billing solution, <strong>providing wealth management firms and their advisors with a streamlined workflow</strong> for generating, analyzing, reviewing, approving, and processing fees, as well as sending invoices\u00A0—\u00A0all within the d1g1t product ecosystem.</p>
+        <p>I designed the user experience and interfaces for d1g1t's billing solution, <strong>providing wealth management firms and their advisors with a streamlined workflow</strong> for generating, analyzing, reviewing, approving, and processing fees, as well as sending invoices&nbsp;—&nbsp;all within the d1g1t product ecosystem.</p>
       </>
     ),
     company: "d1g1t Inc.",
