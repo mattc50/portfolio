@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import styles from "./Globe.module.css";
-// import useScreenWidth from "@/hooks/useScreenWidth";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
 
@@ -38,19 +37,10 @@ interface DotDatum {
   massIdx: number;
 }
 
-interface ProjectedDot {
-  sx: number;
-  sy: number;
-  z: number;
-  massIdx: number;
-}
-
 interface Callout {
   label: string;
   img: string;
   desc: string;
-  lng: number;
-  lat: number;
   x: number;
   y: number;
 }
@@ -80,14 +70,14 @@ interface GlobeState {
 }
 
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
-// Set to false to disable auto-spin entirely. The globe will only move on drag.
-const AUTO_SPIN = true;
+
+const AUTO_SPIN_SPEED = 0.0015;
+const AUTO_SPIN_RESUME_DELAY = 5000;
+const DOT_COUNT = 11000;
+const MARGIN = 8;
 
 // ─── STATIC MASS DEFINITIONS ──────────────────────────────────────────────────
-// Edit this list to place SVG illustrations on the globe.
-// lng: -180 to 180, lat: -90 to 90
-// scale: fraction of sphere diameter (0.05 = tiny, 0.5 = large)
-// boost: dot size multiplier for mass dots (1.0 = same as field dots)
+
 const MASS_DEFINITIONS: MassDefinition[] = [
   {
     label: "Soccer",
@@ -188,34 +178,29 @@ function lngLatToXYZ(lng: number, lat: number): [number, number, number] {
 function tangentBasis(lng: number, lat: number): TangentBasis {
   const lam = (lng * Math.PI) / 180;
   const phi = ((90 - lat) * Math.PI) / 180;
-  const axisE: [number, number, number] = [-Math.sin(lam), 0, Math.cos(lam)];
-  const axisN: [number, number, number] = [
-    -Math.cos(phi) * Math.cos(lam),
-    Math.sin(phi),
-    -Math.cos(phi) * Math.sin(lam),
-  ];
-  return { axisE, axisN };
+  return {
+    axisE: [-Math.sin(lam), 0, Math.cos(lam)],
+    axisN: [-Math.cos(phi) * Math.cos(lam), Math.sin(phi), -Math.cos(phi) * Math.sin(lam)],
+  };
 }
 
 function projectOntoTangentPlane(
   dotXYZ: [number, number, number],
   mass: Mass
 ): [number, number] | null {
-  const dx = dotXYZ[0] - mass.centerXYZ[0];
-  const dy = dotXYZ[1] - mass.centerXYZ[1];
-  const dz = dotXYZ[2] - mass.centerXYZ[2];
   const facing =
     dotXYZ[0] * mass.centerXYZ[0] +
     dotXYZ[1] * mass.centerXYZ[1] +
     dotXYZ[2] * mass.centerXYZ[2];
   if (facing < 0) return null;
+  const dx = dotXYZ[0] - mass.centerXYZ[0];
+  const dy = dotXYZ[1] - mass.centerXYZ[1];
+  const dz = dotXYZ[2] - mass.centerXYZ[2];
   const { axisE, axisN } = mass.basis;
   const u = dx * axisE[0] + dy * axisE[1] + dz * axisE[2];
   const v = dx * axisN[0] + dy * axisN[1] + dz * axisN[2];
   const pixPerUnit = mass.svgW / (2 * mass.scale);
-  const px = u * pixPerUnit + mass.svgW / 2;
-  const py = -v * pixPerUnit + mass.svgH / 2;
-  return [px, py];
+  return [u * pixPerUnit + mass.svgW / 2, -v * pixPerUnit + mass.svgH / 2];
 }
 
 function inMaskAt(mass: Mass, px: number, py: number): boolean {
@@ -228,8 +213,8 @@ function inBoundsAt(mass: Mass, px: number, py: number): boolean {
   return px >= 0 && py >= 0 && px < mass.svgW && py < mass.svgH;
 }
 
-function rasterizeSVG(svgStr: string): Promise<Raster | null> {
-  return new Promise((resolve) => {
+async function rasterizeSVG(svgStr: string): Promise<Raster> {
+  return new Promise((resolve, reject) => {
     const img = new Image();
     const blob = new Blob([svgStr], { type: "image/svg+xml" });
     const url = URL.createObjectURL(blob);
@@ -241,20 +226,17 @@ function rasterizeSVG(svgStr: string): Promise<Raster | null> {
       URL.revokeObjectURL(url);
       resolve({ imgData: tmp.getContext("2d")!.getImageData(0, 0, W, H), svgW: W, svgH: H });
     };
-    img.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("SVG rasterization failed")); };
     img.src = url;
   });
 }
 
-// Build a ready-to-use mass object from a definition + rasterized data
 function buildMass(def: MassDefinition, raster: Raster): Mass {
   return {
     ...def,
     centerXYZ: lngLatToXYZ(def.lng, def.lat),
     basis: tangentBasis(def.lng, def.lat),
-    imgData: raster.imgData,
-    svgW: raster.svgW,
-    svgH: raster.svgH,
+    ...raster,
   };
 }
 
@@ -271,15 +253,11 @@ function classifyDots(fibPts: [number, number, number][], masses: Mass[]): DotDa
 
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
 
-const DOT_COUNT = 11000;
-// const MASS_DOT_SCALE = 0.65; // ← 1.0 = original, smaller = tinier
-const AUTO_SPIN_SPEED = 0.0015;        // radians per frame
-const AUTO_SPIN_RESUME_DELAY = 5000;   // ms after drag release before spin resumes
-
 export default function Globe() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const stateRef = useRef<GlobeState>({
     W: 0, H: 0, R: 0,
     rotX: 0.3, rotY: -0.6,
@@ -288,80 +266,102 @@ export default function Globe() {
     lastX: 0, lastY: 0, lastT: 0,
     pvX: 0, pvY: 0,
     autoSpin: true,
-    dotData: [],
-    masses: [],
-    ready: false,
-    rafId: null,
-    hoveredMassIdx: -1,
-    activeMassIdx: -1,
+    dotData: [], masses: [],
+    ready: false, rafId: null,
+    hoveredMassIdx: -1, activeMassIdx: -1,
   });
 
-  const [callout, setCallout] = useState<Callout | null>(null);
-  const [calloutVisible, setCalloutVisible] = useState(false);
-  const calloutRef = useRef<Callout | null>(null); // mirrors callout for use inside RAF
-  const calloutVisibleRef = useRef(false);
+  // Single source of truth for callout UI state
+  const [callout, setCallout] = useState<(Callout & { visible: boolean }) | null>(null);
   const calloutElemRef = useRef<HTMLDivElement>(null);
-  const suppressNextClick = useRef(false);
 
-  const calloutHideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // ── Rotation helpers ──────────────────────────────────────────────────────
 
-  // const screenWidth = useScreenWidth();
-
-  // const showCallout = useCallback((c: Callout) => {
-  //   if (calloutHideTimer.current) clearTimeout(calloutHideTimer.current);
-  //   setCallout(c);
-  //   // Defer to next frame so the element is mounted before opacity transitions
-  //   requestAnimationFrame(() => {
-  //     setCalloutVisible(true);
-  //     calloutVisibleRef.current = true;
-  //   })
-  // }, []);
-  const showCallout = useCallback((c: Callout) => {
-    if (calloutHideTimer.current) clearTimeout(calloutHideTimer.current);
-    setCalloutVisible(false);          // ensure hidden while repositioning
-    calloutVisibleRef.current = false;
-    setCallout(c);
-    // visibility is set after the clamp useEffect runs — see below
-  }, []);
-
-  const hideCallout = useCallback(() => {
-    setCalloutVisible(false);
-    calloutVisibleRef.current = false;
-    // stateRef.current.autoSpin = true;
-    calloutHideTimer.current = setTimeout(() => setCallout(null), 200); // match transition duration
-  }, []);
-
-  // ── Rotation helpers (read/write stateRef) ──
   const rotPt = useCallback(([x, y, z]: [number, number, number]): [number, number, number] => {
-    const s = stateRef.current;
-    const cy = Math.cos(s.rotY), sy = Math.sin(s.rotY);
+    const { rotX, rotY } = stateRef.current;
+    const cy = Math.cos(rotY), sy = Math.sin(rotY);
     const x1 = x * cy + z * sy, z1 = -x * sy + z * cy;
-    const cx = Math.cos(s.rotX), sx = Math.sin(s.rotX);
+    const cx = Math.cos(rotX), sx = Math.sin(rotX);
     return [x1, y * cx - z1 * sx, y * sx + z1 * cx];
   }, []);
 
   const unrotPt = useCallback(([x, y, z]: [number, number, number]): [number, number, number] => {
-    const s = stateRef.current;
-    const cx = Math.cos(s.rotX), sx = Math.sin(s.rotX);
+    const { rotX, rotY } = stateRef.current;
+    const cx = Math.cos(rotX), sx = Math.sin(rotX);
     const y1 = y * cx + z * sx, z1 = -y * sx + z * cx;
-    const cy = Math.cos(s.rotY), sy = Math.sin(s.rotY);
+    const cy = Math.cos(rotY), sy = Math.sin(rotY);
     return [x * cy - z1 * sy, y1, x * sy + z1 * cy];
   }, []);
 
-  // ── Draw ──
+  // ── Hit testing ──────────────────────────────────────────────────────────
+
+  const getHitMassIdx = useCallback((clientX: number, clientY: number): number => {
+    const s = stateRef.current;
+    const canvas = canvasRef.current!;
+    const rect = canvas.getBoundingClientRect();
+    const cx = s.W / 2, cy = s.H / 2;
+    const mx = (clientX - rect.left) * (s.W / rect.width);
+    const my = (clientY - rect.top) * (s.H / rect.height);
+    const dx = (mx - cx) / s.R;
+    const dy = (cy - my) / s.R;
+    if (dx * dx + dy * dy > 1) return -1;
+    const worldPt = unrotPt([dx, dy, Math.sqrt(1 - dx * dx - dy * dy)]);
+    for (let i = 0; i < s.masses.length; i++) {
+      const uv = projectOntoTangentPlane(worldPt, s.masses[i]);
+      if (uv && inBoundsAt(s.masses[i], uv[0], uv[1])) return i;
+    }
+    return -1;
+  }, [unrotPt]);
+
+  // ── Callout helpers ───────────────────────────────────────────────────────
+
+  const showCalloutForMass = useCallback((massIdx: number) => {
+    const s = stateRef.current;
+    const m = s.masses[massIdx];
+    const wrapRect = wrapRef.current!.getBoundingClientRect();
+    const canvasRect = canvasRef.current!.getBoundingClientRect();
+    const [rx, ry] = rotPt(m.centerXYZ);
+    const scaleX = canvasRect.width / s.W;
+    const scaleY = canvasRect.height / s.H;
+    let x = canvasRect.left - wrapRect.left + (s.W / 2 + rx * s.R) * scaleX;
+    let y = canvasRect.top - wrapRect.top + (s.H / 2 - ry * s.R) * scaleY;
+
+    // Measure callout element to clamp position — use last known size or defer
+    const el = calloutElemRef.current;
+    if (el) {
+      const elW = el.offsetWidth || 296; // 280 + padding
+      const elH = el.offsetHeight || 80;
+      x = Math.max(elW / 2 + MARGIN, Math.min(wrapRect.width - elW / 2 - MARGIN, x));
+      if (y - elH - 12 < MARGIN) y = y + elH + 24;
+    }
+
+    setCallout({ label: m.label, img: m.img, desc: m.desc, x, y, visible: false });
+    // Defer visibility so the element can mount/measure first
+    requestAnimationFrame(() =>
+      setCallout(c => c && c.label === m.label ? { ...c, visible: true } : c)
+    );
+  }, [rotPt]);
+
+  const hideCallout = useCallback(() => {
+    setCallout(c => c ? { ...c, visible: false } : null);
+    stateRef.current.activeMassIdx = -1;
+    setTimeout(() => setCallout(null), 200);
+  }, []);
+
+  // ── Draw ─────────────────────────────────────────────────────────────────
+
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d")!;
-    const { W, H, R, dotData, masses } = stateRef.current;
+    const { W, H, R, dotData, masses, hoveredMassIdx, activeMassIdx } = stateRef.current;
     const MASS_DOT_SCALE = Math.max(0.45, Math.min(0.65, W / 1000));
-
-    const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const cx = W / 2, cy = H / 2;
+    const BASE = { r: 109, g: 105, b: 98 };
 
     ctx.clearRect(0, 0, W, H);
 
-    const projected: ProjectedDot[] = dotData
+    const projected = dotData
       .map(({ pt, massIdx }) => {
         const [x, y, z] = rotPt(pt);
         return { sx: cx + x * R, sy: cy - y * R, z, massIdx };
@@ -372,14 +372,9 @@ export default function Globe() {
       const t = (z + 1) / 2;
       const front = z >= 0;
       const isMass = massIdx >= 0;
-      // const boost = isMass ? (masses[massIdx]?.boost ?? 1.8) : 1.0;
-
-      const BASE = { r: 109, g: 105, b: 98 }; // ← change this one line
-
-      const isHovered = massIdx >= 0 && massIdx === stateRef.current.hoveredMassIdx;
-      const isActive = massIdx >= 0 && massIdx === stateRef.current.activeMassIdx;
+      const isHighlighted = massIdx >= 0 && (massIdx === hoveredMassIdx || massIdx === activeMassIdx);
       const boost = isMass ? (masses[massIdx]?.boost ?? 1.8) : 1.0;
-      const darken = isHovered || isActive ? 0.5 : 0; // additive alpha boost
+      const darken = isHighlighted ? 0.5 : 0;
 
       ctx.beginPath();
       if (isMass) {
@@ -406,13 +401,14 @@ export default function Globe() {
     }
   }, [rotPt]);
 
-  // ── Tick ──
+  // ── Animation loop ────────────────────────────────────────────────────────
+
   useEffect(() => {
     const loop = () => {
       const s = stateRef.current;
       if (!s.dragging) {
-        s.rotY += s.velY; s.rotX += s.velX;
-        s.velX *= 0.95;
+        s.rotY += s.velY;
+        s.rotX += s.velX;
         s.velX *= 0.95;
         s.velY *= 0.95;
         if (s.autoSpin) s.rotY += AUTO_SPIN_SPEED;
@@ -423,13 +419,12 @@ export default function Globe() {
     };
     stateRef.current.rafId = requestAnimationFrame(loop);
     return () => {
-      if (stateRef.current.rafId !== null) {
-        cancelAnimationFrame(stateRef.current.rafId);
-      }
+      if (stateRef.current.rafId !== null) cancelAnimationFrame(stateRef.current.rafId);
     };
   }, [draw]);
 
-  // ── Resize ──
+  // ── Resize ────────────────────────────────────────────────────────────────
+
   useEffect(() => {
     const canvas = canvasRef.current!;
     const onResize = () => {
@@ -447,50 +442,56 @@ export default function Globe() {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  // ── Load masses + classify dots ──
+  // ── Load masses + classify dots ───────────────────────────────────────────
+
   useEffect(() => {
     const fibPts = genFib(DOT_COUNT);
-    Promise.all(MASS_DEFINITIONS.map((def) => rasterizeSVG(def.svg))).then((rasters) => {
-      const masses = MASS_DEFINITIONS.map((def, i) => buildMass(def, rasters[i]!));
-      const dotData = classifyDots(fibPts, masses);
+    Promise.all(MASS_DEFINITIONS.map(def => rasterizeSVG(def.svg))).then(rasters => {
+      const masses = MASS_DEFINITIONS.map((def, i) => buildMass(def, rasters[i]));
       stateRef.current.masses = masses;
-      stateRef.current.dotData = dotData;
+      stateRef.current.dotData = classifyDots(fibPts, masses);
       stateRef.current.ready = true;
     });
   }, []);
 
-  // ── Pointer / drag handlers ──
+  // ── Pointer / drag / interaction handlers (single effect) ─────────────────
+
   useEffect(() => {
     const canvas = canvasRef.current!;
 
-    const pDown = (e: MouseEvent | TouchEvent) => {
+    // ─ Drag ──────────────────────────────────────────────────────────────
+    const onPointerDown = (e: MouseEvent | TouchEvent) => {
       const s = stateRef.current;
       s.autoSpin = false;
       if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
-      s.dragging = true; s.didDrag = false;
+      s.dragging = true;
+      s.didDrag = false;
       canvas.style.cursor = "grabbing";
-      const t = (e as TouchEvent).touches ? (e as TouchEvent).touches[0] : (e as MouseEvent);
-      s.lastX = t.clientX; s.lastY = t.clientY;
-      s.lastT = Date.now(); s.pvX = 0; s.pvY = 0;
-      // s.activeMassIdx = -1;
-      // hideCallout();
+      const t = (e as TouchEvent).touches?.[0] ?? (e as MouseEvent);
+      s.lastX = t.clientX;
+      s.lastY = t.clientY;
+      s.lastT = Date.now();
+      s.pvX = s.pvY = 0;
     };
 
-    const pMove = (e: MouseEvent | TouchEvent) => {
+    const onPointerMove = (e: MouseEvent | TouchEvent) => {
       const s = stateRef.current;
       if (!s.dragging) return;
       if (e.cancelable) e.preventDefault();
       s.didDrag = true;
-      const t = (e as TouchEvent).touches ? (e as TouchEvent).touches[0] : (e as MouseEvent);
+      const t = (e as TouchEvent).touches?.[0] ?? (e as MouseEvent);
       const dx = t.clientX - s.lastX, dy = t.clientY - s.lastY;
       const dt = Math.max(Date.now() - s.lastT, 1);
-      s.pvX = dy / dt; s.pvY = dx / dt;
-      s.rotY += dx * 0.006; s.rotX += dy * 0.006;
-      s.rotX = Math.max(-1.2, Math.min(1.2, s.rotX));
-      s.lastX = t.clientX; s.lastY = t.clientY; s.lastT = Date.now();
+      s.pvX = dy / dt;
+      s.pvY = dx / dt;
+      s.rotY += dx * 0.006;
+      s.rotX = Math.max(-1.2, Math.min(1.2, s.rotX + dy * 0.006));
+      s.lastX = t.clientX;
+      s.lastY = t.clientY;
+      s.lastT = Date.now();
     };
 
-    const pUp = () => {
+    const onPointerUp = () => {
       const s = stateRef.current;
       s.dragging = false;
       canvas.style.cursor = "grab";
@@ -501,172 +502,42 @@ export default function Globe() {
         hideCallout();
       }
       resumeTimerRef.current = setTimeout(() => {
-        // if (stateRef.current.activeMassIdx === -1) {
         stateRef.current.autoSpin = true;
-        // }
       }, AUTO_SPIN_RESUME_DELAY);
     };
 
-    canvas.addEventListener("mousedown", pDown);
-    window.addEventListener("mousemove", pMove);
-    window.addEventListener("mouseup", pUp);
-    canvas.addEventListener("touchstart", pDown, { passive: true });
-    canvas.addEventListener("touchmove", pMove, { passive: false });
-    canvas.addEventListener("touchend", pUp);
-
-    return () => {
-      canvas.removeEventListener("mousedown", pDown);
-      window.removeEventListener("mousemove", pMove as EventListener);
-      window.removeEventListener("mouseup", pUp);
-      canvas.removeEventListener("touchstart", pDown);
-      canvas.removeEventListener("touchmove", pMove);
-      canvas.removeEventListener("touchend", pUp);
-    };
-  }, []);
-
-  // ── Hover / callout ──
-  // useEffect(() => {
-  //   const canvas = canvasRef.current!;
-
-  //   const onMove = (e: MouseEvent) => {
-  //     const s = stateRef.current;
-  //     if (s.dragging) { setCallout(null); return; }
-
-  //     const rect = canvas.getBoundingClientRect();
-  //     const cx = s.W / 2, cy = s.H / 2;
-  //     const mx = (e.clientX - rect.left) * (s.W / rect.width);
-  //     const my = (e.clientY - rect.top) * (s.H / rect.height);
-  //     const dx = (mx - cx) / s.R;
-  //     const dy = (cy - my) / s.R;
-  //     const r2 = dx * dx + dy * dy;
-
-  //     if (r2 > 1) { setCallout(null); return; }
-
-  //     const dz = Math.sqrt(1 - r2);
-  //     const worldPt = unrotPt([dx, dy, dz]);
-
-  //     let hitIdx = -1;
-  //     for (let i = 0; i < s.masses.length; i++) {
-  //       const m = s.masses[i];
-  //       if (!m.imgData) continue;
-  //       const uv = projectOntoTangentPlane(worldPt, m);
-  //       if (uv && inBoundsAt(m, uv[0], uv[1])) { hitIdx = i; break; }
-  //     }
-
-  //     if (hitIdx >= 0) {
-  //       canvas.style.cursor = "default";
-  //       const m = s.masses[hitIdx];
-  //       const wrapRect = wrapRef.current!.getBoundingClientRect();
-  //       setCallout({
-  //         label: m.label,
-  //         img: m.img,
-  //         desc: m.desc,
-  //         lng: m.lng,
-  //         lat: m.lat,
-  //         x: e.clientX - wrapRect.left,
-  //         y: e.clientY - wrapRect.top,
-  //       });
-  //     } else {
-  //       canvas.style.cursor = "grab";
-  //       setCallout(null);
-  //     }
-  //   };
-
-  //   const onLeave = () => setCallout(null);
-
-  //   canvas.addEventListener("mousemove", onMove);
-  //   canvas.addEventListener("mouseleave", onLeave);
-  //   return () => {
-  //     canvas.removeEventListener("mousemove", onMove);
-  //     canvas.removeEventListener("mouseleave", onLeave);
-  //   };
-  // }, [unrotPt]);
-  useEffect(() => {
-    const canvas = canvasRef.current!;
-
-    const getHitMassIdx = (clientX: number, clientY: number): number => {
-      const s = stateRef.current;
-      const rect = canvas.getBoundingClientRect();
-      const cx = s.W / 2, cy = s.H / 2;
-      const mx = (clientX - rect.left) * (s.W / rect.width);
-      const my = (clientY - rect.top) * (s.H / rect.height);
-      const dx = (mx - cx) / s.R;
-      const dy = (cy - my) / s.R;
-      if (dx * dx + dy * dy > 1) return -1;
-      const dz = Math.sqrt(1 - dx * dx - dy * dy);
-      const worldPt = unrotPt([dx, dy, dz]);
-      for (let i = 0; i < s.masses.length; i++) {
-        const uv = projectOntoTangentPlane(worldPt, s.masses[i]);
-        if (uv && inBoundsAt(s.masses[i], uv[0], uv[1])) return i;
-      }
-      return -1;
-    };
-
-    const buildCallout = (massIdx: number): Callout => {
-      const s = stateRef.current;
-      const m = s.masses[massIdx];
-      const wrapRect = wrapRef.current!.getBoundingClientRect();
-      const canvasRect = canvasRef.current!.getBoundingClientRect();
-
-      // Project the mass center onto screen space
-      const [rx, ry, rz] = rotPt(m.centerXYZ);
-      const cx = s.W / 2, cy = s.H / 2;
-      const sx = cx + rx * s.R;
-      const sy = cy - ry * s.R;
-
-      // Scale from canvas logical pixels to actual screen pixels
-      const scaleX = canvasRect.width / s.W;
-      const scaleY = canvasRect.height / s.H;
-
-      return {
-        label: m.label,
-        img: m.img,
-        desc: m.desc,
-        lng: m.lng,
-        lat: m.lat,
-        x: canvasRect.left - wrapRect.left + sx * scaleX,
-        y: canvasRect.top - wrapRect.top + sy * scaleY,
-      };
-    };
-
+    // ─ Hover (mouse only) ────────────────────────────────────────────────
     const onMouseMove = (e: MouseEvent) => {
       const s = stateRef.current;
-      if (s.dragging) { s.hoveredMassIdx = -1; return; }
+      if (s.dragging) return;
       const idx = getHitMassIdx(e.clientX, e.clientY);
       s.hoveredMassIdx = idx;
       canvas.style.cursor = idx >= 0 ? "pointer" : "grab";
     };
 
-    const onMouseLeave = () => {
-      stateRef.current.hoveredMassIdx = -1;
-      // hideCallout();
-    };
+    const onMouseLeave = () => { stateRef.current.hoveredMassIdx = -1; };
 
-    const onMouseClick = (e: MouseEvent) => {
-      if (suppressNextClick.current) { // ← add this guard
-        suppressNextClick.current = false;
-        return;
-      }
+    // ─ Click / tap (shared logic) ────────────────────────────────────────
+    const handleTap = (clientX: number, clientY: number) => {
       const s = stateRef.current;
-      if (s.didDrag) return;
-      const idx = getHitMassIdx(e.clientX, e.clientY);
+      const idx = getHitMassIdx(clientX, clientY);
       if (idx >= 0) {
-        // console.log(idx, s.activeMassIdx, calloutVisibleRef.current)
-
-        if (idx === s.activeMassIdx && calloutVisibleRef.current) {
-          s.activeMassIdx = -1;
+        if (idx === s.activeMassIdx && callout?.visible) {
           hideCallout();
         } else {
           s.activeMassIdx = idx;
-          showCallout(buildCallout(idx));
+          showCalloutForMass(idx);
         }
       } else {
-        s.activeMassIdx = -1;
         hideCallout();
       }
     };
 
-    // Touch tap: fire if touchend is close in time and position to touchstart
+    const onMouseClick = (e: MouseEvent) => {
+      if (!stateRef.current.didDrag) handleTap(e.clientX, e.clientY);
+    };
+
+    // Touch tap: fires only for quick, short-distance touches (not drags)
     let touchStartX = 0, touchStartY = 0, touchStartT = 0;
     const onTouchStart = (e: TouchEvent) => {
       touchStartX = e.touches[0].clientX;
@@ -674,83 +545,50 @@ export default function Globe() {
       touchStartT = Date.now();
     };
     const onTouchEnd = (e: TouchEvent) => {
-      const s = stateRef.current;
       const t = e.changedTouches[0];
-      const dx = t.clientX - touchStartX, dy = t.clientY - touchStartY;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      const elapsed = Date.now() - touchStartT;
-      if (dist >= 8 || elapsed >= 300) return;
-
-      suppressNextClick.current = true; // ← add this
-      // if (dist < 8 && elapsed < 300) {
-      const idx = getHitMassIdx(t.clientX, t.clientY);
-      if (idx >= 0) {
-        if (idx === s.activeMassIdx && calloutVisibleRef.current) {
-          s.activeMassIdx = -1;
-          hideCallout();
-        } else {
-          s.activeMassIdx = idx;
-          showCallout(buildCallout(idx));
-        }
-      } else {
-        s.activeMassIdx = -1;
-        hideCallout();
+      const dist = Math.hypot(t.clientX - touchStartX, t.clientY - touchStartY);
+      if (dist < 8 && Date.now() - touchStartT < 300) {
+        // Prevent the subsequent `click` event from firing a second tap
+        e.preventDefault();
+        handleTap(t.clientX, t.clientY);
       }
     };
+
+    canvas.addEventListener("mousedown", onPointerDown);
+    window.addEventListener("mousemove", onPointerMove);
+    window.addEventListener("mouseup", onPointerUp);
+    canvas.addEventListener("touchstart", onPointerDown, { passive: true });
+    canvas.addEventListener("touchmove", onPointerMove, { passive: false });
+    canvas.addEventListener("touchend", onPointerUp);
 
     canvas.addEventListener("mousemove", onMouseMove);
     canvas.addEventListener("mouseleave", onMouseLeave);
     canvas.addEventListener("click", onMouseClick);
     canvas.addEventListener("touchstart", onTouchStart, { passive: true });
     canvas.addEventListener("touchend", onTouchEnd);
+
     return () => {
+      canvas.removeEventListener("mousedown", onPointerDown);
+      window.removeEventListener("mousemove", onPointerMove as EventListener);
+      window.removeEventListener("mouseup", onPointerUp);
+      canvas.removeEventListener("touchstart", onPointerDown);
+      canvas.removeEventListener("touchmove", onPointerMove);
+      canvas.removeEventListener("touchend", onPointerUp);
+
       canvas.removeEventListener("mousemove", onMouseMove);
       canvas.removeEventListener("mouseleave", onMouseLeave);
       canvas.removeEventListener("click", onMouseClick);
       canvas.removeEventListener("touchstart", onTouchStart);
       canvas.removeEventListener("touchend", onTouchEnd);
     };
-  }, [unrotPt]);
+  }, [getHitMassIdx, showCalloutForMass, hideCallout, callout?.visible]);
 
-  useEffect(() => {
-    if (!callout || !calloutElemRef.current || !wrapRef.current) return;
-    const el = calloutElemRef.current;
-    const wrap = wrapRef.current.getBoundingClientRect();
-    const elW = el.offsetWidth;
-    const elH = el.offsetHeight;
-    const MARGIN = 8;
+  // ── Render ────────────────────────────────────────────────────────────────
 
-    // The callout is centered horizontally on x, and sits above y
-    let x = callout.x;
-    let y = callout.y;
-
-    // Clamp horizontal: left edge and right edge
-    x = Math.max(elW / 2 + MARGIN, Math.min(wrap.width - elW / 2 - MARGIN, x));
-
-    // Clamp vertical: if it would go above the wrap, flip below the pointer
-    if (y - elH - 12 < MARGIN) {
-      y = callout.y + elH + 24; // flip below
-    }
-
-    if (x !== callout.x || y !== callout.y) {
-      setCallout(c => c ? { ...c, x, y } : c);
-    }
-
-    requestAnimationFrame(() => {
-      setCalloutVisible(true);
-      calloutVisibleRef.current = true;
-    });
-  }, [callout?.label]); // re-run when a new mass is selected
-
-  // ── Render ──
   return (
     <div ref={wrapRef} className={styles.frame}>
-      <canvas
-        ref={canvasRef}
-        className={styles.canvas}
-      />
+      <canvas ref={canvasRef} className={styles.canvas} />
 
-      {/* Callout tooltip */}
       {callout && (
         <div
           ref={calloutElemRef}
@@ -761,32 +599,27 @@ export default function Globe() {
             transform: "translate(-50%, calc(-100% - 12px))",
             pointerEvents: "none",
             zIndex: 10,
-            opacity: calloutVisible ? 1 : 0,
+            opacity: callout.visible ? 1 : 0,
             transition: "opacity 0.2s ease",
           }}
         >
           <div style={{
-            width: "280px",
+            width: 280,
             background: "var(--color-background-primary, #fff)",
             border: "0.5px solid var(--color-border-tertiary, #ddd)",
             borderRadius: "var(--border-radius-md, 6px)",
-            padding: "11px",
+            padding: 11,
             fontSize: 12,
             color: "var(--color-text-primary, #111)",
-            // whiteSpace: "nowrap",
             boxShadow: "0 4px 16px rgba(0,0,0,0.12)",
             display: "flex",
-            // flexDirection: "column",
             gap: 12,
           }}>
-            <img src={callout.img} className={styles.calloutImg} />
-            {/* <span style={{ fontWeight: 500 }}>{callout.label}</span> */}
+            <img src={callout.img} className={styles.calloutImg} alt={callout.label} />
             <span style={{ fontSize: 12, color: "var(--color-text-secondary, #666)" }}>
-              {/* {callout.lng}° lng, {callout.lat}° lat */}
               {callout.desc}
             </span>
           </div>
-          {/* Arrow */}
           <div className={styles.calloutArrow}>
             <div style={{
               position: "absolute",
