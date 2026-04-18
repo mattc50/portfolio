@@ -323,6 +323,10 @@ export default function Globe() {
   const wrapRef = useRef<HTMLDivElement>(null);
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Stable ref so event handlers always call the latest hideCallout without
+  // needing it as a dependency (which caused the effect to re-register and
+  // cancel its own in-flight timer on every visibility change).
+  const hideCalloutRef = useRef<() => void>(() => { });
 
   const stateRef = useRef<GlobeState>({
     W: 0, H: 0, R: 0,
@@ -683,7 +687,7 @@ export default function Globe() {
       canvas.removeEventListener("touchstart", onTouchStart);
       canvas.removeEventListener("touchend", onTouchEnd);
     };
-  }, [getHitMassIdx, showCalloutForMass, hideCallout, callout?.visible]);
+  }, [getHitMassIdx, showCalloutForMass, callout?.visible]);
 
   // ── Render ────────────────────────────────────────────────────────────────
 
