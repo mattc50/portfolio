@@ -322,6 +322,7 @@ export default function Globe() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const stateRef = useRef<GlobeState>({
     W: 0, H: 0, R: 0,
@@ -407,7 +408,8 @@ export default function Globe() {
       // first and swap in the new one after the CSS transition finishes (200ms).
       // This prevents the old image from being visible at the new position.
       if (prev.visible) {
-        setTimeout(() => setCallout(next), 200);
+        if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
+        hideTimerRef.current = setTimeout(() => setCallout(next), 200);
         return { ...prev, visible: false };
       }
 
@@ -417,9 +419,10 @@ export default function Globe() {
   }, [rotPt]);
 
   const hideCallout = useCallback(() => {
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
     setCallout(c => c ? { ...c, visible: false } : null);
     stateRef.current.activeMassIdx = -1;
-    setTimeout(() => setCallout(null), 200);
+    hideTimerRef.current = setTimeout(() => setCallout(null), 200);
   }, []);
 
   // ── Draw ─────────────────────────────────────────────────────────────────
