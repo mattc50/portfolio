@@ -394,8 +394,26 @@ export default function Globe() {
     const anchorX = canvasRect.left - wrapRect.left + (s.W / 2 + rx * s.R) * scaleX;
     const anchorY = canvasRect.top - wrapRect.top + (s.H / 2 - ry * s.R) * scaleY;
 
-    // Set anchor only; useLayoutEffect clamps x/y once the element mounts
-    setCallout({ label: m.label, img: m.img, desc: m.desc, anchorX, anchorY, x: anchorX, y: anchorY, visible: false });
+    const next = { label: m.label, img: m.img, desc: m.desc, anchorX, anchorY, x: anchorX, y: anchorY, visible: false };
+
+    setCallout(prev => {
+      // No existing callout — mount immediately, useLayoutEffect will clamp + reveal.
+      if (!prev) return next;
+
+      // Same mass tapped again — nothing to do (handled by the toggle in handleTap).
+      if (prev.img === next.img) return prev;
+
+      // Different mass: if the old callout is currently visible, fade it out
+      // first and swap in the new one after the CSS transition finishes (200ms).
+      // This prevents the old image from being visible at the new position.
+      if (prev.visible) {
+        setTimeout(() => setCallout(next), 200);
+        return { ...prev, visible: false };
+      }
+
+      // Old callout already hidden (mid-transition) — replace immediately.
+      return next;
+    });
   }, [rotPt]);
 
   const hideCallout = useCallback(() => {
@@ -697,6 +715,7 @@ export default function Globe() {
             gap: 12,
           }}>
             <CalloutImage
+              key={callout.img}
               src={callout.img}
               alt={callout.label}
               className={styles.calloutImg}
