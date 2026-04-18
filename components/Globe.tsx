@@ -424,7 +424,10 @@ export default function Globe() {
 
   const hideCallout = useCallback(() => {
     if (hideTimerRef.current) clearTimeout(hideTimerRef.current);
-    setCallout(c => c ? { ...c, visible: false } : null);
+    setCallout(c => {
+      if (!c || !c.visible) return c; // already hidden or hiding, don't interrupt
+      return { ...c, visible: false };
+    });
     stateRef.current.activeMassIdx = -1;
     hideTimerRef.current = setTimeout(() => setCallout(null), 200);
   }, []);
@@ -608,7 +611,7 @@ export default function Globe() {
         s.velX = s.pvX * 0.096;
         s.velY = s.pvY * 0.096;
         s.activeMassIdx = -1;
-        hideCalloutRef.current();
+        setCallout(null);
       }
       resumeTimerRef.current = setTimeout(() => {
         stateRef.current.autoSpin = true;
