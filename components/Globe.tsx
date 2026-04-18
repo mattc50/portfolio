@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useCallback } from "react";
 import styles from "./Globe.module.css";
 
 // ─── TYPES ────────────────────────────────────────────────────────────────────
