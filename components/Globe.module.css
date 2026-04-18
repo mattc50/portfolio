@@ -15,9 +15,15 @@
 }
 
 .calloutImg {
-  /* width: 180px; */
   width: 100px;
+  /* aspect-ratio reserves the full height before the image loads, so the
+     skeleton div (which is position:absolute inside the same wrapper) has
+     something to fill. Pick a ratio that matches your photos — 2/3 is a
+     typical portrait crop. Adjust to 1/1 for square or 4/3 for landscape. */
+  aspect-ratio: 2 / 3;
   object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
 }
 
 .calloutArrow {
@@ -33,7 +39,7 @@
 
 @media (min-width: 768px) {
   .canvas {
-    --fade-point: 80%;
+    /* --fade-point: 80%; */
     margin-bottom: -80px;
   }
 
