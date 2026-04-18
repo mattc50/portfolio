@@ -41,6 +41,10 @@ interface Callout {
   label: string;
   img: string;
   desc: string;
+  /** Raw projected position of the mass center — used as the clamping input */
+  anchorX: number;
+  anchorY: number;
+  /** Clamped render position — written by useLayoutEffect after the element mounts */
   x: number;
   y: number;
 }
@@ -154,6 +158,7 @@ const MASS_DEFINITIONS: MassDefinition[] = [
 `,
   },
 ];
+
 
 // ─── PURE MATH HELPERS ────────────────────────────────────────────────────────
 
@@ -323,23 +328,11 @@ export default function Globe() {
     const [rx, ry] = rotPt(m.centerXYZ);
     const scaleX = canvasRect.width / s.W;
     const scaleY = canvasRect.height / s.H;
-    let x = canvasRect.left - wrapRect.left + (s.W / 2 + rx * s.R) * scaleX;
-    let y = canvasRect.top - wrapRect.top + (s.H / 2 - ry * s.R) * scaleY;
+    const anchorX = canvasRect.left - wrapRect.left + (s.W / 2 + rx * s.R) * scaleX;
+    const anchorY = canvasRect.top - wrapRect.top + (s.H / 2 - ry * s.R) * scaleY;
 
-    // Measure callout element to clamp position — use last known size or defer
-    const el = calloutElemRef.current;
-    if (el) {
-      const elW = el.offsetWidth || 296; // 280 + padding
-      const elH = el.offsetHeight || 80;
-      x = Math.max(elW / 2 + MARGIN, Math.min(wrapRect.width - elW / 2 - MARGIN, x));
-      if (y - elH - 12 < MARGIN) y = y + elH + 24;
-    }
-
-    setCallout({ label: m.label, img: m.img, desc: m.desc, x, y, visible: false });
-    // Defer visibility so the element can mount/measure first
-    requestAnimationFrame(() =>
-      setCallout(c => c && c.label === m.label ? { ...c, visible: true } : c)
-    );
+    // Set anchor only; useLayoutEffect clamps x/y once the element mounts
+    setCallout({ label: m.label, img: m.img, desc: m.desc, anchorX, anchorY, x: anchorX, y: anchorY, visible: false });
   }, [rotPt]);
 
   const hideCallout = useCallback(() => {
@@ -400,6 +393,31 @@ export default function Globe() {
       ctx.fill();
     }
   }, [rotPt]);
+
+  // ── Callout safe-area clamp ──────────────────────────────────────
+  // Runs synchronously after the callout mounts so we can measure its real
+  // dimensions and clamp before the browser paints, avoiding any visible jump.
+  useLayoutEffect(() => {
+    if (!callout || callout.visible) return; // only act on freshly-set (hidden) callouts
+    const el = calloutElemRef.current;
+    const wrap = wrapRef.current;
+    if (!el || !wrap) return;
+
+    const elW = el.offsetWidth;
+    const elH = el.offsetHeight;
+    const wrapW = wrap.getBoundingClientRect().width;
+
+    let x = callout.anchorX;
+    let y = callout.anchorY;
+
+    // Clamp horizontal so the popup never overflows the wrapper
+    x = Math.max(elW / 2 + MARGIN, Math.min(wrapW - elW / 2 - MARGIN, x));
+
+    // If the popup would clip above the wrapper, flip it below the anchor point
+    if (y - elH - 12 < MARGIN) y = callout.anchorY + elH + 24;
+
+    setCallout(c => c ? { ...c, x, y, visible: true } : c);
+  }, [callout?.label, callout?.visible]); // re-run whenever a new mass is selected
 
   // ── Animation loop ────────────────────────────────────────────────────────
 
