@@ -511,7 +511,7 @@ export default function Globe() {
     if (y - elH - 12 < MARGIN) y = callout.anchorY + elH + 24;
 
     setCallout(c => c ? { ...c, x, y, visible: true } : c);
-  }, [callout?.label, callout?.visible]); // re-run whenever a new mass is selected
+  }, [callout?.label]); // re-run whenever a new mass is selected
 
   // ── Animation loop ────────────────────────────────────────────────────────
 
