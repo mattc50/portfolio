@@ -256,6 +256,66 @@ function classifyDots(fibPts: [number, number, number][], masses: Mass[]): DotDa
   });
 }
 
+// ─── CALLOUTIMAGE ───────────────────────────────────────────────────────────────────
+
+interface CalloutImageProps {
+  src: string;
+  alt: string;
+  className?: string;
+  /** Shared session cache so already-loaded images skip the skeleton. */
+  loadCache: Set<string>;
+}
+
+function CalloutImage({ src, alt, className, loadCache }: CalloutImageProps) {
+  const [loaded, setLoaded] = useState(() => loadCache.has(src));
+
+  const handleLoad = useCallback(() => {
+    loadCache.add(src);
+    setLoaded(true);
+  }, [src, loadCache]);
+
+  // Inject the shimmer keyframes once per page (idempotent via id check)
+  useEffect(() => {
+    const ID = "callout-shimmer-keyframes";
+    if (!document.getElementById(ID)) {
+      const style = document.createElement("style");
+      style.id = ID;
+      style.textContent = `@keyframes callout-shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }`;
+      document.head.appendChild(style);
+    }
+  }, []);
+
+  return (
+    <div style={{ position: "relative", flexShrink: 0 }}>
+      {/* Skeleton — absolutely fills the wrapper, which is sized by the img */}
+      {!loaded && (
+        <div
+          aria-hidden
+          style={{
+            position: "absolute",
+            inset: 0,
+            borderRadius: 4,
+            background: "linear-gradient(90deg, var(--skeleton-base, #e8e8e8) 25%, var(--skeleton-shine, #f4f4f4) 50%, var(--skeleton-base, #e8e8e8) 75%)",
+            backgroundSize: "200% 100%",
+            animation: "callout-shimmer 1.4s ease-in-out infinite",
+          }}
+        />
+      )}
+      <img
+        src={src}
+        alt={alt}
+        className={className}
+        onLoad={handleLoad}
+        style={{
+          display: "block",
+          opacity: loaded ? 1 : 0,
+          transition: "opacity 0.2s ease",
+        }}
+      />
+    </div>
+  );
+}
+
 // ─── COMPONENT ────────────────────────────────────────────────────────────────
 
 export default function Globe() {
@@ -279,6 +339,9 @@ export default function Globe() {
   // Single source of truth for callout UI state
   const [callout, setCallout] = useState<(Callout & { visible: boolean }) | null>(null);
   const calloutElemRef = useRef<HTMLDivElement>(null);
+  // Tracks which image srcs have already loaded this session so returning
+  // to a previously-opened callout skips the skeleton immediately.
+  const imgLoadCache = useRef<Set<string>>(new Set());
 
   // ── Rotation helpers ──────────────────────────────────────────────────────
 
@@ -633,7 +696,12 @@ export default function Globe() {
             display: "flex",
             gap: 12,
           }}>
-            <img src={callout.img} className={styles.calloutImg} alt={callout.label} />
+            <CalloutImage
+              src={callout.img}
+              alt={callout.label}
+              className={styles.calloutImg}
+              loadCache={imgLoadCache.current}
+            />
             <span style={{ fontSize: 12, color: "var(--color-text-secondary, #666)" }}>
               {callout.desc}
             </span>
