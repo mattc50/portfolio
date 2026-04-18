@@ -428,6 +428,9 @@ export default function Globe() {
     stateRef.current.activeMassIdx = -1;
     hideTimerRef.current = setTimeout(() => setCallout(null), 200);
   }, []);
+  // Keep the ref in sync so handlers that capture it early always get the
+  // latest version without triggering effect re-registration.
+  hideCalloutRef.current = hideCallout;
 
   // ── Draw ─────────────────────────────────────────────────────────────────
 
@@ -605,7 +608,7 @@ export default function Globe() {
         s.velX = s.pvX * 0.096;
         s.velY = s.pvY * 0.096;
         s.activeMassIdx = -1;
-        hideCallout();
+        hideCalloutRef.current();
       }
       resumeTimerRef.current = setTimeout(() => {
         stateRef.current.autoSpin = true;
@@ -629,13 +632,13 @@ export default function Globe() {
       const idx = getHitMassIdx(clientX, clientY);
       if (idx >= 0) {
         if (idx === s.activeMassIdx && callout?.visible) {
-          hideCallout();
+          hideCalloutRef.current();
         } else {
           s.activeMassIdx = idx;
           showCalloutForMass(idx);
         }
       } else {
-        hideCallout();
+        hideCalloutRef.current();
       }
     };
 
